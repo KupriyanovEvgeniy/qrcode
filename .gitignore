@@ -1,0 +1,10 @@
+.gradle
+*.ipr
+*.iml
+*.iws
+build/*
+deploy/*
+modules/*/build/*
+.idea/*
+out
+elastic_data/

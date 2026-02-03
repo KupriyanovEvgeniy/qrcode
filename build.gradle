@@ -1,0 +1,359 @@
+buildscript {
+    ext.thesisVersion = '5.4.5'
+    ext.cubaVersion = '7.2-thesis-5.4.5'
+
+    repositories {
+        mavenLocal()
+        maven {
+            url 'http://deprecated-repo.haulmont.com:8587/nexus/content/groups/work'
+            credentials {
+                username('external')
+                password('aiva33n8')
+            }
+        }
+    }
+    dependencies {
+        classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"
+        classpath "com.haulmont.thesis.gradle:thesis-plugin:$thesisVersion"
+    }
+}
+
+apply(plugin: 'cuba')
+apply(plugin: 'thesis')
+
+cuba {
+    artifact {
+        group = 'com.company.qrcode'
+        version = '0.1'
+        isSnapshot = true
+    }
+    tomcat {
+        dir = "$project.rootDir/deploy/tomcat"
+        version = '9.0.98'
+    }
+    ide {
+        copyright = '''Copyright (c) $today.year LTD Haulmont Samara. All Rights Reserved.
+Haulmont Samara proprietary and confidential.
+Use is subject to license terms.'''
+    }
+    appHome = "$tomcat.dir/conf/app_home"
+}
+
+thesis { 
+    autoConfigure { 
+        portal = true  
+        mobileRest = true  
+        hrRest = true 
+    }
+    extWebApps {
+        webApp {
+            artifact = "com.haulmont.thesis.hr:hr-front:$thesisVersion:tomcat@zip"
+            appContextName = 'app-hr'
+        }
+    }
+    distribution {
+        assistantDistributions = 'exe,msi,deb,rpm,dmg'
+    }
+}
+
+idea {
+    module {
+        //and some extra dirs that should be excluded by IDEA
+        excludeDirs += file('deploy')
+        excludeDirs += file('test-run')
+        downloadSources = true
+    }
+}
+
+dependencies {
+    appComponent("com.haulmont.thesis.app:thesis-global:$thesisVersion")
+
+}
+
+def modulePrefix = 'app'
+
+def globalModule = project(":${modulePrefix}-global")
+def coreModule = project(":${modulePrefix}-core")
+def guiModule = project(":${modulePrefix}-gui")
+def webModule = project(":${modulePrefix}-web")
+def portalModule = project(":${modulePrefix}-portal")
+def mobileRestModule = project(":${modulePrefix}-mobile-rest")
+def hrRestModule = project(":${modulePrefix}-hr-rest")
+def cachingModule = project(":${modulePrefix}-caching")
+
+def servletApi = 'javax.servlet:javax.servlet-api:3.1.0'
+def postgres = 'org.postgresql:postgresql:42.7.4'
+
+idea {
+    module {
+        downloadSources = true
+        excludeDirs += file('deploy')
+        excludeDirs += file('test-run')
+    }
+}
+project.configurations {
+    tomcat
+}
+
+configure([globalModule, coreModule, guiModule, webModule, portalModule, mobileRestModule, hrRestModule, cachingModule]) {
+    apply(plugin: 'java')
+    apply(plugin: 'maven')
+    apply(plugin: 'cuba')
+    apply(plugin: 'thesis')
+    apply(plugin: 'groovy')
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    sourceSets {
+        main {
+            groovy {
+                srcDir 'src'
+                exclude '**/*.java'
+                exclude '**/appfolders/**/*.groovy'
+                exclude '**/process/**'
+                exclude '**/scripts/**'
+            }
+            java.outputDir = new File(project.buildDir, "classes/main")
+            groovy.outputDir = new File(project.buildDir, "classes/main")
+        }
+        test {
+            groovy { srcDir 'test' }
+            java.outputDir = new File(project.buildDir, "classes/test")
+            groovy.outputDir = new File(project.buildDir, "classes/test")
+        }
+    }
+
+    sourceSets.main.output.classesDirs.setFrom(new File(project.buildDir, "classes/main"))
+    sourceSets.test.output.classesDirs.setFrom(new File(project.buildDir, "classes/test"))
+
+    compileGroovy {
+        groovyOptions.encoding = 'UTF-8'
+        options.encoding = 'UTF-8'
+    }
+
+    compileTestGroovy {
+        groovyOptions.setFork(false)
+        groovyOptions.encoding = 'UTF-8'
+        options.encoding = 'UTF-8'
+    }
+
+    task sourceJar(type: Jar) {
+        from file('src')
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives sourceJar
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+configure(globalModule) {
+    dependencies {
+        if (!JavaVersion.current().isJava8()) {
+            runtimeOnly('com.sun.xml.ws:jaxws-rt:2.3.3')
+        }
+
+        compile 'com.google.zxing:core:3.5.3'
+        compile 'com.google.zxing:javase:3.5.3'
+    }
+    entitiesEnhancing {
+        main {
+            enabled = true
+        }
+        test {
+            enabled = true
+        }
+    }
+}
+
+configure(cachingModule) {
+    dependencies {
+        compile("com.haulmont.thesis.app:thesis-caching:$thesisVersion")
+        compileOnly('com.hazelcast:hazelcast:5.2.3')
+    }
+
+    task createHazelcastInstanceJar(type: Jar) {
+        baseName = 'thesis-hazelcast-dependencies'
+        from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+        manifest {}
+    }
+}
+
+configure(coreModule) {
+    configurations {
+        jdbc
+        dbscripts
+    }
+
+    dependencies {
+        compile(globalModule)
+        compile(cachingModule)
+        compileOnly(servletApi)
+        jdbc(postgres)
+        testRuntime(postgres)
+
+        compile 'com.google.zxing:javase:3.5.3'
+    }
+
+    task cleanConf(description: 'Cleans up conf directory') {
+        doLast {
+            def dir = new File(cuba.tomcat.dir, "/conf/${modulePrefix}-core")
+            if (dir.isDirectory()) {
+                ant.delete(includeemptydirs: true) {
+                    fileset(dir: dir, includes: '**/*', excludes: 'local.app.properties process/**/* app.license')
+                }
+            }
+        }
+    }
+
+    task deploy(dependsOn: assemble, type: ThesisWebAppCoreDeployment) {
+        appName = "${modulePrefix}-core"
+        appJars("${modulePrefix}-global", "${modulePrefix}-core", "${modulePrefix}-caching") 
+    }
+
+    //use core/src/app.properties file to set connection to DB properties
+    task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: ThesisDbCreation) {  }
+    task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: ThesisDbUpdate) {}
+
+    task createTestDb(dependsOn: assembleDbScripts, description: 'Creates test database', type: ThesisDbCreation) {
+        dbms = 'postgres'
+        host = 'localhost'
+        dbName = 'qrcode_test'
+        dbUser = 'cuba'
+        dbPassword = 'cuba' 
+    }
+    test.dependsOn assemble
+    test.dependsOn createTestDb
+    task createTestDb_pdstore(description: 'Creates test database for pdstore', type: ThesisDbCreation) {
+        storeName = 'pdstore'
+        dropExistingDb = false
+        dbms = 'postgres'
+        host = 'localhost'
+        dbName = 'qrcode_test'
+        dbUser = 'cuba'
+        dbPassword = 'cuba' 
+    }
+    task createTestDb_statstore(description: 'Creates test database for statstore', type: ThesisDbCreation) {
+        storeName = 'statstore'
+        dropExistingDb = false
+        dbms = 'postgres'
+        host = 'localhost'
+        dbName = 'qrcode_test'
+        dbUser = 'cuba'
+        dbPassword = 'cuba' 
+    }
+    createTestDb.finalizedBy {
+        createTestDb_pdstore
+        createTestDb_statstore
+    }
+
+    sourceSets {
+        main {
+            //just to make idea treat groovy scripts like sources
+            groovy {
+                if ("true".equalsIgnoreCase(System.getProperty("idea.active"))) {
+                    srcDir 'db/init/groovy'
+                    srcDir 'db/init_pdstore/groovy'
+                    srcDir 'db/init_statstore/groovy'
+                }
+            }
+        }
+    }
+}
+
+configure(guiModule) {
+    dependencies {
+        compile(globalModule)
+    }
+    task deployConf(type: Copy) {
+        from file('src')
+        include "com/company/qrcode/**"
+        into "$cuba.tomcat.dir/conf/${modulePrefix}"
+    }
+}
+
+configure(webModule) {
+    configurations {
+        webcontent
+    }
+
+    dependencies {
+        compileOnly(servletApi)
+        compile(globalModule)
+        compile(guiModule)
+
+        compile 'com.google.zxing:javase:3.5.3'
+    }
+
+    task webArchive(type: Zip) {
+        from file("$buildDir/web")
+        from file('web')
+        classifier = 'web'
+    }
+
+    artifacts {
+        archives webArchive
+    }
+
+    task clearMessagesCache(type: CubaClearMessagesCache) {
+        appName = "${modulePrefix}"
+    }
+
+    task deployConf(type: Copy, dependsOn: clearMessagesCache) {
+        from file('src')
+        include "com/company/qrcode/**"
+        into "$cuba.tomcat.dir/conf/${modulePrefix}"
+    }
+
+    task cleanConf(description: 'Clears conf files') {
+        doLast {
+            def dir = new File(cuba.tomcat.dir, "/conf/${modulePrefix}")
+            if (dir.isDirectory()) {
+                ant.delete(includeemptydirs: true) {
+                    fileset(dir: dir, includes: '**/*', excludes: 'local.web-app.properties')
+                }
+            }
+        }
+    }
+
+    task deploy(dependsOn: [assemble, cleanConf], type: ThesisWebAppDeployment) {
+        appName = "${modulePrefix}"
+        appJars("${modulePrefix}-global", "${modulePrefix}-gui", "${modulePrefix}-web")
+    }
+}
+
+
+task undeploy(type: Delete, dependsOn: ":${modulePrefix}-web:cleanConf") {
+    delete("$cuba.tomcat.dir/shared")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-core")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-gui")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-portal")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-mobile-rest")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-hr-rest")
+    delete(thesis.extWebApps.webAppConfigurations.collect { "$cuba.tomcat.dir/webapps/${it.resolveAppContextName()}" })
+}
+
+task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefix}-web:deploy", ":${modulePrefix}-portal:deploy", ":${modulePrefix}-mobile-rest:deploy", ":${modulePrefix}-hr-rest:deploy"], description: 'Redeploys applications and restarts local Tomcat') {
+    doLast {
+        ant.waitfor(maxwait: 6, maxwaitunit: 'second', checkevery: 2, checkeveryunit: 'second') {
+            not {
+                socket(server: 'localhost', port: '8787')
+            }
+        }
+    }
+}
+if (!thesis.extWebApps.webAppConfigurations.empty) {
+    restart.dependsOn('deployExternalWebApps')
+}
+restart.finalizedBy start

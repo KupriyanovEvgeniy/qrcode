@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://eventRequestEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.qrcode.web.ui.eventrequest">
+    <data>
+        <instance id="eventRequestDc"
+                  class="com.company.qrcode.entity.EventRequest">
+            <view extends="_local">
+                <property name="eventHall" view="_minimal"/>
+                <property name="participants" view="_local">
+                    <property name="user" view="_minimal"/>
+                </property>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="participantsDc"
+                    class="com.company.qrcode.entity.EventParticipant">
+            <loader id="participantsDl">
+                <query>
+                    <![CDATA[select e from qrcode$EventParticipant e
+                    where e.eventRequest.id = :eventId]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="allUsersDc"
+                    class="com.haulmont.cuba.security.entity.User">
+            <loader id="allUsersDl">
+                <query>
+                    <![CDATA[select u from sec$User u
+                    where u.active = true
+                    order by u.lastName, u.firstName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="800"
+                width="900"/>
+
+    <layout expand="scrollBox" spacing="true">
+        <scrollBox id="scrollBox" spacing="true">
+            <form id="form" dataContainer="eventRequestDc">
+                <column width="350px">
+                    <textField id="eventCodeField" property="eventCode" enable="false"/>
+                    <textField id="eventNameField" property="eventName"/>
+                    <pickerField id="eventHallField" property="eventHall">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="clear" type="picker_clear"/>
+                        </actions>
+                    </pickerField>
+                    <dateField id="eventDateField" property="eventDate"/>
+                    <timeField id="timeStartField" property="timeStart"/>
+                    <timeField id="timeEndField" property="timeEnd"/>
+                </column>
+            </form>
+
+            <groupBox caption="Участники мероприятия" spacing="true" id="">
+                <hbox spacing="true" id="">
+                    <lookupPickerField id="userPicker"
+                                       optionsContainer="allUsersDc"
+                                       caption="Выберите пользователя">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                    <button id="addParticipantBtn" caption="Добавить"/>
+                </hbox>
+
+                <table id="participantsTable" width="100%" dataContainer="participantsDc">
+                    <columns>
+                        <column id="user.lastName" caption="Фамилия"/>
+                        <column id="user.firstName" caption="Имя"/>
+                        <column id="user.middleName" caption="Отчество"/>
+                        <column id="user.position" caption="Должность"/>
+                        <column id="user.email" caption="Email"/>
+                    </columns>
+                    <buttonsPanel id="">
+                        <button id="generateQrBtn" caption="Сгенерировать QR"/>
+                        <button id="removeParticipantBtn" caption="Удалить" enable="false"/>
+                        <button id="showQrBtn" caption="Показать QR" enable="false"/>
+                        <button id="downloadQrBtn" caption="Скачать QR"/>
+                    </buttonsPanel>
+                </table>
+            </groupBox>
+
+            <!-- Блок для показа QR-кода -->
+            <vbox id="qrViewBox" visible="false" spacing="true" caption="Просмотр QR-кода">
+                <image id="qrPreviewImage"
+                       width="300px"
+                       height="300px"
+                       scaleMode="CONTAIN"
+                       align="MIDDLE_CENTER"/>
+                <button id="closeQrBtn" caption="Закрыть" align="MIDDLE_CENTER"/>
+            </vbox>
+        </scrollBox>
+
+        <hbox id="editActions" spacing="true">
+            <button id="saveBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

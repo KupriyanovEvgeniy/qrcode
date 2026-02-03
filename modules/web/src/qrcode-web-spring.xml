@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:gui="http://schemas.haulmont.com/cuba/spring/cuba-gui.xsd">
+
+    <!-- Annotation-based beans -->
+    <context:component-scan base-package="com.company.qrcode.web"/>
+
+    <gui:screens base-packages="com.company.qrcode.web "/>
+    <bean id="qrcode_proxyCreator" class="com.haulmont.thesis.web.sys.remoting.ThesisWebRemoteProxyBeanCreator">
+        <property name="serverSelector" ref="cuba_ServerSelector"/>
+        <property name="remoteServices">
+            <map>
+                <entry key="qrcode_EventCodeService" value="com.company.qrcode.service.EventCodeService"/>
+                <entry key="qrcode_EventQrCodeService" value="com.company.qrcode.service.EventQrCodeService"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>

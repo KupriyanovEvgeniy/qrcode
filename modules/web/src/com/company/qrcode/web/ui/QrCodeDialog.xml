@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="QR-код участника"
+        messagesPack="com.company.qrcode.web.ui">
+
+    <dialogMode height="450"
+                width="450"/>
+
+    <layout spacing="true" expand="mainLayout" margin="true">
+        <vbox id="mainLayout" spacing="true" align="MIDDLE_CENTER">
+            <image id="qrImage"
+                   width="350px"
+                   height="350px"
+                   scaleMode="CONTAIN"/>
+        </vbox>
+    </layout>
+</window>
