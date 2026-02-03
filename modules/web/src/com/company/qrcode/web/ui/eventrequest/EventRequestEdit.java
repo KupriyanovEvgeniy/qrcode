@@ -415,9 +415,21 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     public void onSendEmailBtnClick(Button.ClickEvent event) {
         EventRequest eventRequest = getEditedEntity();
 
-        if (eventRequest.getParticipants().isEmpty()) {
+        if (eventRequest.getParticipants() == null || eventRequest.getParticipants().isEmpty()) {
             notifications.create()
                     .withCaption("Нет участников для отправки email")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        boolean missingQr = eventRequest.getParticipants().stream()
+                .anyMatch(p -> p.getQrCode() == null || p.getQrCode().length == 0);
+
+        if (missingQr) {
+            notifications.create()
+                    .withCaption("Не все QR-коды сгенерированы")
+                    .withDescription("Сначала нажмите 'Сгенерировать QR'")
                     .withType(Notifications.NotificationType.WARNING)
                     .show();
             return;

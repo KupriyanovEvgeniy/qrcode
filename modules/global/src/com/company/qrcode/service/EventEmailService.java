@@ -11,5 +11,5 @@ import com.company.qrcode.entity.EventRequest;
 public interface EventEmailService {
     String NAME = "qrcode_EventEmailService";
 
-    void sendEmailsToParticipants(EventRequest event);
+    void sendEmailsToParticipants(EventRequest eventRequest);
 }
