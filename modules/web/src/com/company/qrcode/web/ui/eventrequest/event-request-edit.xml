@@ -81,6 +81,7 @@
                         <button id="removeParticipantBtn" caption="Удалить" enable="false"/>
                         <button id="showQrBtn" caption="Показать QR" enable="false"/>
                         <button id="downloadQrBtn" caption="Скачать QR"/>
+                        <button id="sendEmailBtn" caption="Отправить email"/>
                     </buttonsPanel>
                 </table>
             </groupBox>

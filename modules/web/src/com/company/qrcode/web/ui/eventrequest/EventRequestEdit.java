@@ -22,6 +22,23 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 
+import com.company.qrcode.entity.EventParticipant;
+import com.company.qrcode.entity.EventRequest;
+import com.company.qrcode.service.EventCodeService;
+import com.company.qrcode.service.EventEmailService;
+import com.company.qrcode.service.EventQrCodeService;
+import com.company.qrcode.web.ui.Qrcodedialog;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.entity.User;
+
 import javax.inject.Inject;
 import java.time.LocalDate;
 
@@ -30,6 +47,9 @@ import java.time.LocalDate;
 @EditedEntityContainer("eventRequestDc")
 @LoadDataBeforeShow
 public class EventRequestEdit extends StandardEditor<EventRequest> {
+
+    @Inject
+    private EventEmailService eventEmailService;
 
     @Inject
     private DataManager dataManager;
@@ -390,4 +410,34 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
         dialog.show();
     }
+
+    @Subscribe("sendEmailBtn")
+    public void onSendEmailBtnClick(Button.ClickEvent event) {
+        EventRequest eventRequest = getEditedEntity();
+
+        if (eventRequest.getParticipants().isEmpty()) {
+            notifications.create()
+                    .withCaption("Нет участников для отправки email")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        try {
+            eventEmailService.sendEmailsToParticipants(eventRequest);
+
+            notifications.create()
+                    .withCaption("Письма отправлены")
+                    .withDescription("Email отправлен всем участникам")
+                    .show();
+
+        } catch (Exception e) {
+            notifications.create()
+                    .withCaption("Ошибка при отправке email")
+                    .withDescription(e.getMessage())
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
 }
