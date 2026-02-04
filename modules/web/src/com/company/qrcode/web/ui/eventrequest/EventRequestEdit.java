@@ -38,14 +38,18 @@ import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
+import com.vaadin.annotations.JavaScript;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @UiController("qrcode$EventRequest.edit")
 @UiDescriptor("event-request-edit.xml")
 @EditedEntityContainer("eventRequestDc")
 @LoadDataBeforeShow
+@JavaScript("https://unpkg.com/@zxing/browser@latest")
 public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Inject
@@ -98,6 +102,9 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Inject
     private ScreenBuilders screenBuilders;
+
+    @Inject
+    private Button scanQrBtn;
 
     @Subscribe
     public void onInitEntity(InitEntityEvent<EventRequest> event) {
@@ -452,4 +459,55 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
     }
 
+    @Subscribe("scanQrBtn")
+    public void onScanQrBtnClick(Button.ClickEvent event) {
+        openQrScanner();
+    }
+
+    private void openQrScanner() {
+        String js = ""
+                + "navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })"
+                + ".then(function(stream) {"
+                + "  let overlay = document.createElement('div');"
+                + "  overlay.style.position = 'fixed';"
+                + "  overlay.style.top = '0';"
+                + "  overlay.style.left = '0';"
+                + "  overlay.style.width = '100%';"
+                + "  overlay.style.height = '100%';"
+                + "  overlay.style.background = 'rgba(0,0,0,0.7)';"
+                + "  overlay.style.display = 'flex';"
+                + "  overlay.style.justifyContent = 'center';"
+                + "  overlay.style.alignItems = 'center';"
+                + "  overlay.id = 'cameraOverlay';"
+                + "  document.body.appendChild(overlay);"
+
+                + "  let video = document.createElement('video');"
+                + "  video.style.width = '400px';"
+                + "  video.style.height = '300px';"
+                + "  video.style.border = '2px solid black';"
+                + "  video.autoplay = true;"
+                + "  video.srcObject = stream;"
+                + "  overlay.appendChild(video);"
+
+                + "  let closeBtn = document.createElement('button');"
+                + "  closeBtn.innerText = 'Закрыть камеру';"
+                + "  closeBtn.style.position = 'absolute';"
+                + "  closeBtn.style.top = '20px';"
+                + "  closeBtn.style.right = '20px';"
+                + "  closeBtn.style.padding = '10px 20px';"
+                + "  closeBtn.style.fontSize = '16px';"
+                + "  closeBtn.onclick = function() {"
+                + "    stream.getTracks().forEach(track => track.stop());"  // выключаем камеру
+                + "    document.body.removeChild(overlay);"               // убираем overlay
+                + "  };"
+                + "  overlay.appendChild(closeBtn);"
+
+                + "})"
+                + ".catch(function(err) { alert('Не удалось открыть камеру: ' + err); });";
+
+        com.haulmont.cuba.web.AppUI ui = com.haulmont.cuba.web.AppUI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> com.vaadin.ui.JavaScript.getCurrent().execute(js));
+        }
+    }
 }

@@ -82,8 +82,10 @@
                         <button id="showQrBtn" caption="Показать QR" enable="false"/>
                         <button id="downloadQrBtn" caption="Скачать QR"/>
                         <button id="sendEmailBtn" caption="Отправить email"/>
+                        <button id="scanQrBtn" caption="Сканировать QR"/>
                     </buttonsPanel>
                 </table>
+
             </groupBox>
 
             <!-- Блок для показа QR-кода -->
