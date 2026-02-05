@@ -161,6 +161,8 @@ configure(globalModule) {
 
         compile 'com.google.zxing:core:3.5.3'
         compile 'com.google.zxing:javase:3.5.3'
+
+
     }
     entitiesEnhancing {
         main {
@@ -203,6 +205,7 @@ configure(coreModule) {
         testRuntime(postgres)
 
         compile 'com.google.zxing:javase:3.5.3'
+
     }
 
     task cleanConf(description: 'Cleans up conf directory') {
@@ -293,6 +296,7 @@ configure(webModule) {
         compile(guiModule)
 
         compile 'com.google.zxing:javase:3.5.3'
+        
     }
 
     task webArchive(type: Zip) {

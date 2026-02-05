@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://qrScanner.caption"
+        messagesPack="com.company.qrcode.web.ui">
+    <dialogMode height="800"
+                width="1000"/>
+    <layout spacing="true" expand="resultBox">
+
+        <!-- Панель управления -->
+        <hbox id="controlPanel" spacing="true" margin="true">
+            <button id="startBtn" caption="Включить камеру" icon="VIDEO_CAMERA"/>
+            <button id="stopBtn" caption="Выключить камеру" icon="CLOSE" enabled="false"/>
+            <button id="scanBtn" caption="Сделать снимок" icon="CAMERA" enabled="false"/>
+            <button id="copyBtn" caption="Копировать" icon="COPY"/>
+            <button id="clearBtn" caption="Очистить" icon="TRASH"/>
+            <button id="closeBtn" caption="Закрыть" icon="CLOSE"/>
+        </hbox>
+
+        <!-- Информация о камере -->
+        <groupBox caption="Инструкция" width="100%" id="">
+            <label value="1. Нажмите 'Включить камеру' и разрешите доступ к камере"
+                    id=""/>
+            <label value="2. Наведите камеру на QR-код для автоматического сканирования"
+                   id=""/>
+            <label value="3. Или нажмите 'Сделать снимок' для ручного сканирования"
+                    id=""/>
+            <label value="4. Распознанный текст появится в поле ниже"
+                    id=""/>
+        </groupBox>
+
+        <!-- Результаты сканирования -->
+        <groupBox id="resultBox" caption="Результат сканирования" width="100%" >
+            <vbox width="100%" spacing="true" id="">
+                <textArea id="resultText"
+                          width="100%"
+                          height="200px"
+                          editable="false"/>
+
+                <!-- Информация о сканировании -->
+                <label id="scanInfo" value="Ожидание QR-кода..."/>
+            </vbox>
+        </groupBox>
+
+        <!-- Дополнительные действия -->
+        <hbox spacing="true" align="MIDDLE_CENTER" id="">
+            <button id="searchParticipantBtn"
+                    caption="Найти участника"
+                    icon="SEARCH"
+                    visible="false"/>
+            <button id="registerParticipantBtn"
+                    caption="Зарегистрировать"
+                    icon="CHECK"
+                    visible="false"/>
+        </hbox>
+
+    </layout>
+</window>
