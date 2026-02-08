@@ -82,7 +82,9 @@
                         <button id="showQrBtn" caption="Показать QR" enable="false"/>
                         <button id="downloadQrBtn" caption="Скачать QR"/>
                         <button id="sendEmailBtn" caption="Отправить email"/>
-                        <button id="scanQrBtn" caption="Сканировать QR"/>
+                        <upload id="qrFileUpload"
+                                         accept="image/*"/>
+                        <button id="processQrBtn" caption="Обработать QR"/>
                     </buttonsPanel>
                 </table>
 

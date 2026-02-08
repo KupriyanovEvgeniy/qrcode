@@ -11,6 +11,12 @@ import com.company.qrcode.entity.EventRequest;
 import com.company.qrcode.service.EventCodeService;
 import com.company.qrcode.service.EventQrCodeService;
 import com.company.qrcode.web.ui.Qrcodedialog;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.Result;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -40,16 +46,25 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.vaadin.annotations.JavaScript;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @UiController("qrcode$EventRequest.edit")
 @UiDescriptor("event-request-edit.xml")
 @EditedEntityContainer("eventRequestDc")
 @LoadDataBeforeShow
-@JavaScript("https://unpkg.com/@zxing/browser@latest")
+@JavaScript({"scripts/qr-scanner.js",
+        "https://unpkg.com/@zxing/browser@latest"})
 public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Inject
@@ -104,7 +119,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     private ScreenBuilders screenBuilders;
 
     @Inject
-    private Button scanQrBtn;
+    private FileUploadField qrFileUpload;
 
     @Subscribe
     public void onInitEntity(InitEntityEvent<EventRequest> event) {
@@ -459,55 +474,137 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
     }
 
-    @Subscribe("scanQrBtn")
-    public void onScanQrBtnClick(Button.ClickEvent event) {
-        openQrScanner();
+    @Subscribe("processQrBtn")
+    public void onProcessQrBtnClick(Button.ClickEvent event) {
+        if (qrFileUpload.getValue() == null) {
+            notifications.create()
+                    .withCaption("Ошибка")
+                    .withDescription("Выберите файл с QR-кодом")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        try {
+            byte[] bytes = qrFileUpload.getBytes(); // загруженный файл в байтах
+            String qrText = decodeQrFromBytes(bytes);
+            processQrText(qrText);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifications.create()
+                    .withCaption("Ошибка")
+                    .withDescription(e.getMessage())
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
     }
 
-    private void openQrScanner() {
-        String js = ""
-                + "navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })"
-                + ".then(function(stream) {"
-                + "  let overlay = document.createElement('div');"
-                + "  overlay.style.position = 'fixed';"
-                + "  overlay.style.top = '0';"
-                + "  overlay.style.left = '0';"
-                + "  overlay.style.width = '100%';"
-                + "  overlay.style.height = '100%';"
-                + "  overlay.style.background = 'rgba(0,0,0,0.7)';"
-                + "  overlay.style.display = 'flex';"
-                + "  overlay.style.justifyContent = 'center';"
-                + "  overlay.style.alignItems = 'center';"
-                + "  overlay.id = 'cameraOverlay';"
-                + "  document.body.appendChild(overlay);"
+    // Декодирование QR из байтов
+    private String decodeQrFromBytes(byte[] bytes) throws Exception {
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+        LuminanceSource source = new BufferedImageLuminanceSource(image);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        Result result = new MultiFormatReader().decode(bitmap);
+        System.out.println(result.getText());
+        return result.getText();
+    }
 
-                + "  let video = document.createElement('video');"
-                + "  video.style.width = '400px';"
-                + "  video.style.height = '300px';"
-                + "  video.style.border = '2px solid black';"
-                + "  video.autoplay = true;"
-                + "  video.srcObject = stream;"
-                + "  overlay.appendChild(video);"
+    private void processQrText(String qrText) {
 
-                + "  let closeBtn = document.createElement('button');"
-                + "  closeBtn.innerText = 'Закрыть камеру';"
-                + "  closeBtn.style.position = 'absolute';"
-                + "  closeBtn.style.top = '20px';"
-                + "  closeBtn.style.right = '20px';"
-                + "  closeBtn.style.padding = '10px 20px';"
-                + "  closeBtn.style.fontSize = '16px';"
-                + "  closeBtn.onclick = function() {"
-                + "    stream.getTracks().forEach(track => track.stop());"  // выключаем камеру
-                + "    document.body.removeChild(overlay);"               // убираем overlay
-                + "  };"
-                + "  overlay.appendChild(closeBtn);"
-
-                + "})"
-                + ".catch(function(err) { alert('Не удалось открыть камеру: ' + err); });";
-
-        com.haulmont.cuba.web.AppUI ui = com.haulmont.cuba.web.AppUI.getCurrent();
-        if (ui != null) {
-            ui.access(() -> com.vaadin.ui.JavaScript.getCurrent().execute(js));
+        // 1️⃣ Парсим USER_ID из QR
+        UUID userId;
+        try {
+            userId = extractUserId(qrText);
+        } catch (Exception e) {
+            notifications.create()
+                    .withCaption("Ошибка QR-кода")
+                    .withDescription("Не удалось определить пользователя")
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+            return;
         }
+
+        String codMero;
+        try {
+            codMero = extractCodMero(qrText);
+        } catch (Exception e) {
+            notifications.create()
+                    .withCaption("Ошибка QR-кода")
+                    .withDescription("Не удалось определить пользователя")
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+            return;
+        }
+
+        // 2️⃣ Ищем пользователя в БД
+        User user = dataManager.load(User.class)
+                .id(userId)
+                .optional()
+                .orElse(null);
+
+        if (user == null) {
+            notifications.create()
+                    .withCaption("Пользователь не найден")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        // 3️⃣ Проверяем участие в мероприятии
+        EventRequest eventRequest = getEditedEntity();
+
+        EventParticipant participant = participantsDc.getItems().stream()
+                .filter(p -> p.getUser() != null && p.getUser().getId().equals(userId))
+                .findFirst()
+                .orElse(null);
+
+        if (!codMero.equals(eventRequest.getEventCode())) {
+            notifications.create()
+                    .withCaption("Неверное мероприятие")
+                    .withDescription("Этот QR-код относится к другому мероприятию")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        if (participant == null) {
+            notifications.create()
+                    .withCaption("Пользователь не является участником")
+                    .withDescription(user.getLastName() + " " + user.getFirstName())
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        // 4️⃣ УСПЕХ
+        notifications.create()
+                .withCaption("Участник найден")
+                .withDescription(user.getLastName() + " " + user.getFirstName())
+                .show();
+
+        // 🔜 Здесь потом:
+        // participant.setVisited(true);
+        // dataContext.merge(participant);
+    }
+
+    private UUID extractUserId(String qrText) {
+        // Ожидаем формат: USER_ID=uuid
+        for (String line : qrText.split("\n")) {
+            if (line.startsWith("UUID пользователя:")) {
+                return UUID.fromString(line.substring("UUID пользователя:".length()).trim());
+            }
+        }
+        throw new IllegalArgumentException("USER_ID not found in QR");
+    }
+
+    private String extractCodMero(String qrText) {
+        // Ожидаем формат: USER_ID=uuid
+        for (String line : qrText.split("\n")) {
+            if (line.startsWith("Код мероприятия:")) {
+                return line.substring("Код мероприятия:".length()).trim();
+            }
+        }
+        throw new IllegalArgumentException("Код мероприятия not found in QR");
     }
 }

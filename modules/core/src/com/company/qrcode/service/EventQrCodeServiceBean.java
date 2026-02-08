@@ -52,7 +52,8 @@ public class EventQrCodeServiceBean implements EventQrCodeService {
                     "Окончание: " + (req.getTimeEnd() != null ? req.getTimeEnd().toString() : ""),
                     "Фамилия: " + (user.getLastName() != null ? user.getLastName() : ""),
                     "Имя: " + (user.getFirstName() != null ? user.getFirstName() : ""),
-                    "Должность: " + (user.getPosition() != null ? user.getPosition() : "")
+                    "Должность: " + (user.getPosition() != null ? user.getPosition() : ""),
+                    "UUID пользователя: " + (user.getUuid() != null ? user.getUuid() : "")
             );
 
             System.out.println("Generating QR for text: " + text);
