@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://externalGuestEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.qrcode.web.ui.externalguest">
+    <data>
+        <instance id="externalGuestDc"
+                  class="com.company.qrcode.entity.ExternalGuest">
+            <view extends="_local"/>
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="externalGuestDc">
+            <column width="350px">
+                <textField id="lastNameField" property="lastName"/>
+                <textField id="firstNameField" property="firstName"/>
+                <textField id="middleNameField" property="middleName"/>
+                <textField id="emailField" property="email"/>
+                <textField id="phoneField" property="phone"/>
+                <textField id="organizationField" property="organization"/>
+                <textField id="positionField" property="position"/>
+                <textField id="passportDataField" property="passportData"/>
+                <textField id="commentField" property="comment"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

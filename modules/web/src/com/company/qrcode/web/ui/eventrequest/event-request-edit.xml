@@ -11,9 +11,14 @@
                 <property name="participants" view="_local">
                     <property name="user" view="_minimal"/>
                 </property>
+                <property name="externalParticipants" view="_local">
+                    <property name="guest" view="_local"/>
+                </property>
             </view>
             <loader/>
         </instance>
+
+        <!-- Внутренние участники -->
         <collection id="participantsDc"
                     class="com.company.qrcode.entity.EventParticipant">
             <loader id="participantsDl">
@@ -23,6 +28,19 @@
                 </query>
             </loader>
         </collection>
+
+        <!-- Внешние участники -->
+        <collection id="externalParticipantsDc"
+                    class="com.company.qrcode.entity.EventExternalParticipant">
+            <loader id="externalParticipantsDl">
+                <query>
+                    <![CDATA[select e from qrcode$EventExternalParticipant e
+                    where e.eventRequest.id = :eventId]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Все пользователи системы -->
         <collection id="allUsersDc"
                     class="com.haulmont.cuba.security.entity.User">
             <loader id="allUsersDl">
@@ -30,6 +48,18 @@
                     <![CDATA[select u from sec$User u
                     where u.active = true
                     order by u.lastName, u.firstName]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Все внешние гости -->
+        <collection id="allGuestsDc"
+                    class="com.company.qrcode.entity.ExternalGuest">
+            <loader id="allGuestsDl">
+                <query>
+                    <![CDATA[select e from qrcode$ExternalGuest e
+                    where e.deleteTs is null
+                    order by e.lastName, e.firstName]]>
                 </query>
             </loader>
         </collection>
@@ -56,39 +86,81 @@
                 </column>
             </form>
 
-            <groupBox caption="Участники мероприятия" spacing="true" id="">
-                <hbox spacing="true" id="">
-                    <lookupPickerField id="userPicker"
-                                       optionsContainer="allUsersDc"
-                                       caption="Выберите пользователя">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <button id="addParticipantBtn" caption="Добавить"/>
-                </hbox>
+            <!-- Табы с участниками -->
+            <tabSheet id="participantsTabSheet" width="100%">
+                <tab id="internalTab" caption="Сотрудники">
+                    <groupBox caption="Участники (сотрудники)" spacing="true" width="100%" id="">
+                        <hbox spacing="true" id="">
+                            <lookupPickerField id="userPicker"
+                                               optionsContainer="allUsersDc"
+                                               caption="Выберите сотрудника">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <button id="addParticipantBtn" caption="Добавить"/>
+                        </hbox>
 
-                <table id="participantsTable" width="100%" dataContainer="participantsDc">
-                    <columns>
-                        <column id="user.lastName" caption="Фамилия"/>
-                        <column id="user.firstName" caption="Имя"/>
-                        <column id="user.middleName" caption="Отчество"/>
-                        <column id="user.position" caption="Должность"/>
-                        <column id="user.email" caption="Email"/>
-                    </columns>
-                    <buttonsPanel id="">
-                        <button id="generateQrBtn" caption="Сгенерировать QR"/>
-                        <button id="removeParticipantBtn" caption="Удалить" enable="false"/>
-                        <button id="showQrBtn" caption="Показать QR" enable="false"/>
-                        <button id="downloadQrBtn" caption="Скачать QR"/>
-                        <button id="sendEmailBtn" caption="Отправить email"/>
-                        <upload id="qrFileUpload"
-                                         accept="image/*"/>
-                        <button id="processQrBtn" caption="Обработать QR"/>
-                    </buttonsPanel>
-                </table>
+                        <table id="participantsTable" width="100%" dataContainer="participantsDc">
+                            <columns>
+                                <column id="user.lastName" caption="Фамилия"/>
+                                <column id="user.firstName" caption="Имя"/>
+                                <column id="user.middleName" caption="Отчество"/>
+                                <column id="user.position" caption="Должность"/>
+                                <column id="user.email" caption="Email"/>
 
-            </groupBox>
+                            </columns>
+                            <buttonsPanel id="participantsButtonsPanel">
+                                <button id="generateQrBtn" caption="Сгенерировать QR"/>
+                                <button id="removeParticipantBtn" caption="Удалить" enable="false"/>
+                                <button id="showQrBtn" caption="Показать QR" enable="false"/>
+                                <button id="downloadQrBtn" caption="Скачать QR"/>
+                                <button id="sendEmailBtn" caption="Отправить email"/>
+                                <!-- Добавлено: компонент для загрузки QR и кнопка обработки -->
+                                <upload id="qrFileUpload"
+                                        accept="image/*"/>
+                                <button id="processQrBtn" caption="Обработать QR"/>
+                            </buttonsPanel>
+                        </table>
+                    </groupBox>
+                </tab>
+
+                <tab id="externalTab" caption="Внешние гости">
+                    <groupBox id=""  caption="Внешние гости" spacing="true" width="100%">
+                        <hbox id="" spacing="true">
+                            <lookupPickerField id="guestPicker"
+                                               optionsContainer="allGuestsDc"
+                                               caption="Выберите гостя">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup"/>
+                                </actions>
+                            </lookupPickerField>
+                            <button id="addExternalGuestBtn" caption="Добавить гостя"/>
+                        </hbox>
+
+                        <table id="externalParticipantsTable" width="100%" dataContainer="externalParticipantsDc">
+                            <columns>
+                                <column id="guest.lastName" caption="Фамилия"/>
+                                <column id="guest.firstName" caption="Имя"/>
+                                <column id="guest.middleName" caption="Отчество"/>
+                                <column id="guest.organization" caption="Организация"/>
+                                <column id="guest.email" caption="Email"/>
+                                <column id="guest.phone" caption="Телефон"/>
+                            </columns>
+                            <buttonsPanel id="" >
+                                <button id="generateExternalQrBtn" caption="Сгенерировать QR"/>
+                                <button id="removeExternalGuestBtn" caption="Удалить" enable="false"/>
+                                <button id="showExternalQrBtn" caption="Показать QR" enable="false"/>
+                                <button id="downloadExternalQrBtn" caption="Скачать QR"/>
+                                <button id="sendExternalEmailBtn" caption="Отправить email"/>
+                                <upload id="externalQrFileUpload"
+                                        accept="image/*"/>
+                                <button id="processExternalQrBtn" caption="Обработать QR"/>
+                            </buttonsPanel>
+                        </table>
+                    </groupBox>
+                </tab>
+            </tabSheet>
 
             <!-- Блок для показа QR-кода -->
             <vbox id="qrViewBox" visible="false" spacing="true" caption="Просмотр QR-кода">
