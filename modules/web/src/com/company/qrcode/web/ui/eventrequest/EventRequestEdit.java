@@ -6,9 +6,9 @@
 
 package com.company.qrcode.web.ui.eventrequest;
 
-import com.company.qrcode.entity.EventParticipant;
-import com.company.qrcode.entity.EventRequest;
+import com.company.qrcode.entity.*;
 import com.company.qrcode.service.EventCodeService;
+import com.company.qrcode.service.EventEmailService;
 import com.company.qrcode.service.EventQrCodeService;
 import com.company.qrcode.web.ui.Qrcodedialog;
 import com.google.zxing.BinaryBitmap;
@@ -28,44 +28,20 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 
-import com.company.qrcode.entity.EventParticipant;
-import com.company.qrcode.entity.EventRequest;
-import com.company.qrcode.service.EventCodeService;
-import com.company.qrcode.service.EventEmailService;
-import com.company.qrcode.service.EventQrCodeService;
-import com.company.qrcode.web.ui.Qrcodedialog;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.InstanceContainer;
-import com.haulmont.cuba.gui.screen.*;
-import com.haulmont.cuba.security.entity.User;
-import com.vaadin.annotations.JavaScript;
-
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @UiController("qrcode$EventRequest.edit")
 @UiDescriptor("event-request-edit.xml")
 @EditedEntityContainer("eventRequestDc")
 @LoadDataBeforeShow
-@JavaScript({"scripts/qr-scanner.js",
-        "https://unpkg.com/@zxing/browser@latest"})
 public class EventRequestEdit extends StandardEditor<EventRequest> {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EventRequestEdit.class);
 
     @Inject
     private EventEmailService eventEmailService;
@@ -121,6 +97,36 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     @Inject
     private FileUploadField qrFileUpload;
 
+    @Inject
+    private CollectionContainer<EventExternalParticipant> externalParticipantsDc;
+    @Inject
+    private CollectionLoader<EventExternalParticipant> externalParticipantsDl;
+    @Inject
+    private CollectionLoader<ExternalGuest> allGuestsDl;
+    @Inject
+    private LookupPickerField<ExternalGuest> guestPicker;
+    @Inject
+    private Table<EventExternalParticipant> externalParticipantsTable;
+    @Inject
+    private Button addExternalGuestBtn;
+    @Inject
+    private Button removeExternalGuestBtn;
+    @Inject
+    private Button generateExternalQrBtn;
+    @Inject
+    private Button showExternalQrBtn;
+    @Inject
+    private Button downloadExternalQrBtn;
+    @Inject
+    private Button sendExternalEmailBtn;
+
+    @Inject
+    private FileUploadField externalQrFileUpload;
+
+    @Inject
+    private Button processExternalQrBtn;
+
+
     @Subscribe
     public void onInitEntity(InitEntityEvent<EventRequest> event) {
         EventRequest req = event.getEntity();
@@ -152,7 +158,114 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             removeParticipantBtn.setEnabled(hasSelection);
             showQrBtn.setEnabled(hasSelection);
         });
+
+        // Загружаем внешних гостей
+        allGuestsDl.load();
+
+        if (eventRequest.getId() != null) {
+            externalParticipantsDl.setParameter("eventId", eventRequest.getId());
+            externalParticipantsDl.load();
+        }
+
+        // Настраиваем таблицу внешних участников
+        externalParticipantsTable.addSelectionListener(e -> {
+            boolean hasSelection = !externalParticipantsTable.getSelected().isEmpty();
+            removeExternalGuestBtn.setEnabled(hasSelection);
+            showExternalQrBtn.setEnabled(hasSelection);
+            downloadExternalQrBtn.setEnabled(hasSelection);
+            sendExternalEmailBtn.setEnabled(hasSelection);
+        });
     }
+
+    @Subscribe("addExternalGuestBtn")
+    public void onAddExternalGuestBtnClick(Button.ClickEvent event) {
+        ExternalGuest selectedGuest = guestPicker.getValue();
+        if (selectedGuest == null) {
+            notifications.create()
+                    .withCaption("Выберите гостя")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        // Проверяем, не добавлен ли уже этот гость
+        boolean alreadyAdded = externalParticipantsDc.getItems().stream()
+                .anyMatch(p -> p.getGuest() != null &&
+                        p.getGuest().getId().equals(selectedGuest.getId()));
+
+        if (alreadyAdded) {
+            notifications.create()
+                    .withCaption("Этот гость уже добавлен")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        // Создаем нового внешнего участника
+        EventExternalParticipant participant = dataContext.create(EventExternalParticipant.class);
+        participant.setEventRequest(getEditedEntity());
+        participant.setGuest(selectedGuest);
+
+        // Добавляем в DataContainer
+        externalParticipantsDc.getMutableItems().add(participant);
+
+        notifications.create()
+                .withCaption("Гость добавлен")
+                .show();
+
+        guestPicker.setValue(null);
+    }
+
+    @Subscribe("removeExternalGuestBtn")
+    public void onRemoveExternalGuestBtnClick(Button.ClickEvent event) {
+        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
+        if (selected == null) return;
+
+        externalParticipantsDc.getMutableItems().remove(selected);
+
+        if (selected.getId() != null) {
+            dataContext.remove(selected);
+        }
+
+        notifications.create()
+                .withCaption("Гость удален")
+                .show();
+    }
+
+    @Subscribe("generateExternalQrBtn")
+    public void onGenerateExternalQrBtnClick(Button.ClickEvent event) {
+        if (externalParticipantsDc.getItems().isEmpty()) {
+            notifications.create()
+                    .withCaption("Нет гостей для генерации QR-кодов")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        int generatedCount = 0;
+        EventRequest eventRequest = getEditedEntity();
+
+        for (EventExternalParticipant participant : externalParticipantsDc.getItems()) {
+            if (participant.getQrCode() == null || participant.getQrCode().length == 0) {
+                try {
+                    byte[] qrCode = eventQrCodeService.generateForExternalGuest(
+                            eventRequest,
+                            participant.getGuest()
+                    );
+                    participant.setQrCode(qrCode);
+                    generatedCount++;
+                } catch (Exception e) {
+                    log.error("Ошибка генерации QR-кода для гостя", e);
+                }
+            }
+        }
+
+        notifications.create()
+                .withCaption("QR-коды сгенерированы")
+                .withDescription("Создано: " + generatedCount)
+                .show();
+    }
+
 
     @Subscribe("addParticipantBtn")
     public void onAddParticipantBtnClick(Button.ClickEvent event) {
@@ -225,26 +338,17 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
         int generatedCount = 0;
 
-        // Генерируем QR-коды для всех участников
         for (EventParticipant participant : participantsDc.getItems()) {
             if (participant.getQrCode() == null || participant.getQrCode().length == 0) {
                 try {
-                    // Используем ваш сервис
                     byte[] qrCode = eventQrCodeService.generateForParticipant(
                             getEditedEntity(),
                             participant.getUser()
                     );
                     participant.setQrCode(qrCode);
                     generatedCount++;
-
-                    // Для отладки
-                    System.out.println("Generated QR code for " +
-                            (participant.getUser() != null ?
-                                    participant.getUser().getLastName() : "unknown") +
-                            ", size: " + (qrCode != null ? qrCode.length : 0) + " bytes");
-
                 } catch (Exception e) {
-                    e.printStackTrace(); // Для отладки
+                    log.error("Ошибка генерации QR-кода", e);
                     notifications.create()
                             .withCaption("Ошибка генерации QR-кода")
                             .withDescription(e.getMessage())
@@ -282,13 +386,11 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             return;
         }
 
-        // Открываем QR-код в диалоговом окне
         openQrCodeDialog(selected);
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        // Убеждаемся, что все участники привязаны к мероприятию
         EventRequest eventRequest = getEditedEntity();
         for (EventParticipant participant : participantsDc.getItems()) {
             participant.setEventRequest(eventRequest);
@@ -297,14 +399,11 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Subscribe
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
-        // После сохранения перезагружаем участников
         EventRequest eventRequest = getEditedEntity();
         if (eventRequest.getId() != null) {
             participantsDl.setParameter("eventId", eventRequest.getId());
             participantsDl.load();
         }
-
-        // Загружаем обновленное мероприятие
         getScreenData().loadAll();
     }
 
@@ -328,34 +427,26 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             return;
         }
 
-        // Скачиваем QR-код
         downloadQrCode(selected);
     }
 
     private void downloadQrCode(EventParticipant participant) {
         try {
             byte[] qrBytes = participant.getQrCode();
-
-            // Создаем имя файла
             User user = participant.getUser();
             String fileName = "qr_code.png";
             if (user != null) {
                 StringBuilder name = new StringBuilder("qr_");
-                if (user.getLastName() != null) {
-                    name.append(user.getLastName());
-                }
+                if (user.getLastName() != null) name.append(user.getLastName());
                 if (user.getFirstName() != null) {
                     if (user.getLastName() != null) name.append("_");
                     name.append(user.getFirstName());
                 }
                 fileName = name.toString() + ".png";
             }
-
-            // Скачиваем через JavaScript
             downloadViaJavaScript(qrBytes, fileName);
-
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Ошибка скачивания QR-кода", e);
             notifications.create()
                     .withCaption("Ошибка скачивания QR-кода")
                     .withDescription(e.getMessage())
@@ -364,39 +455,26 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
     }
 
-    /**
-     * Скачивание через JavaScript (самый простой способ)
-     */
     private void downloadViaJavaScript(byte[] qrBytes, String fileName) {
         try {
-            // Конвертируем в base64
             String base64 = java.util.Base64.getEncoder().encodeToString(qrBytes);
-
-            // Сохраняем оригинальное имя файла для уведомления
             final String originalFileName = fileName;
-
-            // Экранируем кавычки в имени файла для JavaScript
             String escapedFileName = fileName.replace("'", "\\'");
+            String jsCode = "(function() {" +
+                    "  var link = document.createElement('a');" +
+                    "  link.href = 'data:image/png;base64," + base64 + "';" +
+                    "  link.download = '" + escapedFileName + "';" +
+                    "  document.body.appendChild(link);" +
+                    "  link.click();" +
+                    "  document.body.removeChild(link);" +
+                    "})()";
 
-            // Создаем JavaScript код для скачивания
-            String jsCode =
-                    "(function() {" +
-                            "  var link = document.createElement('a');" +
-                            "  link.href = 'data:image/png;base64," + base64 + "';" +
-                            "  link.download = '" + escapedFileName + "';" +
-                            "  document.body.appendChild(link);" +
-                            "  link.click();" +
-                            "  document.body.removeChild(link);" +
-                            "})()";
-
-            // Получаем доступ к JavaScript интерфейсу Vaadin
             com.haulmont.cuba.web.AppUI ui = com.haulmont.cuba.web.AppUI.getCurrent();
             if (ui != null) {
                 ui.access(() -> {
                     com.vaadin.ui.JavaScript javascript = com.vaadin.ui.JavaScript.getCurrent();
                     if (javascript != null) {
                         javascript.execute(jsCode);
-
                         notifications.create()
                                 .withCaption("QR-код готов к скачиванию")
                                 .withDescription("Файл: " + originalFileName)
@@ -404,18 +482,13 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                     }
                 });
             }
-
         } catch (Exception e) {
             throw new RuntimeException("Ошибка скачивания через JavaScript: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Открывает диалоговое окно с QR-кодом
-     */
     private void openQrCodeDialog(EventParticipant participant) {
         byte[] qrBytes = participant.getQrCode();
-
         Qrcodedialog dialog = screenBuilders.screen(this)
                 .withScreenClass(Qrcodedialog.class)
                 .withOpenMode(OpenMode.DIALOG)
@@ -427,9 +500,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             caption = "QR-код: " + user.getLastName() + " " + user.getFirstName();
         }
         dialog.getWindow().setCaption(caption);
-
         dialog.addAfterShowListener(e -> dialog.setQrCode(qrBytes));
-
         dialog.show();
     }
 
@@ -486,12 +557,11 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
 
         try {
-            byte[] bytes = qrFileUpload.getBytes(); // загруженный файл в байтах
+            byte[] bytes = qrFileUpload.getBytes();
             String qrText = decodeQrFromBytes(bytes);
             processQrText(qrText);
-
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Ошибка обработки QR-кода", e);
             notifications.create()
                     .withCaption("Ошибка")
                     .withDescription(e.getMessage())
@@ -500,19 +570,15 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
     }
 
-    // Декодирование QR из байтов
     private String decodeQrFromBytes(byte[] bytes) throws Exception {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
         LuminanceSource source = new BufferedImageLuminanceSource(image);
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         Result result = new MultiFormatReader().decode(bitmap);
-        System.out.println(result.getText());
         return result.getText();
     }
 
     private void processQrText(String qrText) {
-
-        // 1️⃣ Парсим USER_ID из QR
         UUID userId;
         try {
             userId = extractUserId(qrText);
@@ -531,13 +597,12 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         } catch (Exception e) {
             notifications.create()
                     .withCaption("Ошибка QR-кода")
-                    .withDescription("Не удалось определить пользователя")
+                    .withDescription("Не удалось определить мероприятие")
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
             return;
         }
 
-        // 2️⃣ Ищем пользователя в БД
         User user = dataManager.load(User.class)
                 .id(userId)
                 .optional()
@@ -551,7 +616,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             return;
         }
 
-        // 3️⃣ Проверяем участие в мероприятии
         EventRequest eventRequest = getEditedEntity();
 
         EventParticipant participant = participantsDc.getItems().stream()
@@ -577,19 +641,13 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             return;
         }
 
-        // 4️⃣ УСПЕХ
         notifications.create()
                 .withCaption("Участник найден")
                 .withDescription(user.getLastName() + " " + user.getFirstName())
                 .show();
-
-        // 🔜 Здесь потом:
-        // participant.setVisited(true);
-        // dataContext.merge(participant);
     }
 
     private UUID extractUserId(String qrText) {
-        // Ожидаем формат: USER_ID=uuid
         for (String line : qrText.split("\n")) {
             if (line.startsWith("UUID пользователя:")) {
                 return UUID.fromString(line.substring("UUID пользователя:".length()).trim());
@@ -599,7 +657,202 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     }
 
     private String extractCodMero(String qrText) {
-        // Ожидаем формат: USER_ID=uuid
+        for (String line : qrText.split("\n")) {
+            if (line.startsWith("Код мероприятия:")) {
+                return line.substring("Код мероприятия:".length()).trim();
+            }
+        }
+        throw new IllegalArgumentException("Код мероприятия not found in QR");
+    }
+
+    @Subscribe("showExternalQrBtn")
+    public void onShowExternalQrBtnClick(Button.ClickEvent event) {
+        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
+        if (selected == null) {
+            return;
+        }
+
+        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
+            notifications.create()
+                    .withCaption("QR-код еще не сгенерирован")
+                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        openExternalQrCodeDialog(selected);
+    }
+
+    private void openExternalQrCodeDialog(EventExternalParticipant participant) {
+        byte[] qrBytes = participant.getQrCode();
+        Qrcodedialog dialog = screenBuilders.screen(this)
+                .withScreenClass(Qrcodedialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        ExternalGuest guest = participant.getGuest();
+        String caption = "QR-код гостя";
+        if (guest != null) {
+            caption = "QR-код: " + guest.getLastName() + " " + guest.getFirstName();
+        }
+        dialog.getWindow().setCaption(caption);
+        dialog.addAfterShowListener(e -> dialog.setQrCode(qrBytes));
+        dialog.show();
+    }
+
+    @Subscribe("downloadExternalQrBtn")
+    public void onDownloadExternalQrBtnClick(Button.ClickEvent event) {
+        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create()
+                    .withCaption("Выберите гостя")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
+            notifications.create()
+                    .withCaption("QR-код еще не сгенерирован")
+                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        downloadExternalQrCode(selected);
+    }
+
+    private void downloadExternalQrCode(EventExternalParticipant participant) {
+        try {
+            byte[] qrBytes = participant.getQrCode();
+            ExternalGuest guest = participant.getGuest();
+            String fileName = "qr_code.png";
+            if (guest != null) {
+                StringBuilder name = new StringBuilder("qr_guest_");
+                if (guest.getLastName() != null) name.append(guest.getLastName());
+                if (guest.getFirstName() != null) {
+                    if (guest.getLastName() != null) name.append("_");
+                    name.append(guest.getFirstName());
+                }
+                fileName = name.toString() + ".png";
+            }
+            downloadViaJavaScript(qrBytes, fileName);
+        } catch (Exception e) {
+            log.error("Ошибка скачивания QR-кода гостя", e);
+            notifications.create()
+                    .withCaption("Ошибка скачивания QR-кода")
+                    .withDescription(e.getMessage())
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    @Subscribe("processExternalQrBtn")
+    public void onProcessExternalQrBtnClick(Button.ClickEvent event) {
+        if (externalQrFileUpload.getValue() == null) {
+            notifications.create()
+                    .withCaption("Ошибка")
+                    .withDescription("Выберите файл с QR-кодом")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        try {
+            byte[] bytes = externalQrFileUpload.getBytes();
+            String qrText = decodeQrFromBytes(bytes);
+            processExternalQrText(qrText);
+        } catch (Exception e) {
+            log.error("Ошибка обработки QR-кода гостя", e);
+            notifications.create()
+                    .withCaption("Ошибка")
+                    .withDescription(e.getMessage())
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+        }
+    }
+
+    private void processExternalQrText(String qrText) {
+        UUID guestId;
+        try {
+            guestId = extractGuestId(qrText);
+        } catch (Exception e) {
+            notifications.create()
+                    .withCaption("Ошибка QR-кода")
+                    .withDescription("Не удалось определить гостя")
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+            return;
+        }
+
+        String eventCode;
+        try {
+            eventCode = extractExternalEventCode(qrText);
+        } catch (Exception e) {
+            notifications.create()
+                    .withCaption("Ошибка QR-кода")
+                    .withDescription("Не удалось определить мероприятие")
+                    .withType(Notifications.NotificationType.ERROR)
+                    .show();
+            return;
+        }
+
+        ExternalGuest guest = dataManager.load(ExternalGuest.class)
+                .id(guestId)
+                .optional()
+                .orElse(null);
+
+        if (guest == null) {
+            notifications.create()
+                    .withCaption("Гость не найден")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        EventRequest eventRequest = getEditedEntity();
+
+        EventExternalParticipant participant = externalParticipantsDc.getItems().stream()
+                .filter(p -> p.getGuest() != null && p.getGuest().getId().equals(guestId))
+                .findFirst()
+                .orElse(null);
+
+        if (!eventCode.equals(eventRequest.getEventCode())) {
+            notifications.create()
+                    .withCaption("Неверное мероприятие")
+                    .withDescription("Этот QR-код относится к другому мероприятию")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        if (participant == null) {
+            notifications.create()
+                    .withCaption("Гость не является участником")
+                    .withDescription(guest.getLastName() + " " + guest.getFirstName())
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        notifications.create()
+                .withCaption("Гость найден")
+                .withDescription(guest.getLastName() + " " + guest.getFirstName())
+                .show();
+    }
+
+    private UUID extractGuestId(String qrText) {
+        for (String line : qrText.split("\n")) {
+            if (line.startsWith("UUID гостя:")) {
+                return UUID.fromString(line.substring("UUID гостя:".length()).trim());
+            }
+        }
+        throw new IllegalArgumentException("Guest ID not found in QR");
+    }
+
+    private String extractExternalEventCode(String qrText) {
         for (String line : qrText.split("\n")) {
             if (line.startsWith("Код мероприятия:")) {
                 return line.substring("Код мероприятия:".length()).trim();

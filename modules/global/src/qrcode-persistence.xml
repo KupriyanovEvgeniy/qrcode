@@ -14,5 +14,7 @@
         <class>com.company.qrcode.entity.Hall</class>
         <class>com.company.qrcode.entity.EventParticipant</class>
         <class>com.company.qrcode.entity.EventRequest</class>
+        <class>com.company.qrcode.entity.ExternalGuest</class>
+        <class>com.company.qrcode.entity.EventExternalParticipant</class>
     </persistence-unit>
 </persistence>

@@ -53,6 +53,20 @@ public class EventRequest extends StandardEntity {
     @Column(name = "NUMBER_")
     protected Integer number;
 
+
+    // Внешние гости (физические лица) - новое поле
+    @OneToMany(mappedBy = "eventRequest")
+    protected List<EventExternalParticipant> externalParticipants;
+
+
+    public List<EventExternalParticipant> getExternalParticipants() {
+        return externalParticipants;
+    }
+
+    public void setExternalParticipants(List<EventExternalParticipant> externalParticipants) {
+        this.externalParticipants = externalParticipants;
+    }
+
     public Integer getNumber() {
         return number;
     }

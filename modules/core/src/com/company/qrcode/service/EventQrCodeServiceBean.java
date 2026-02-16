@@ -7,6 +7,7 @@
 package com.company.qrcode.service;
 
 import com.company.qrcode.entity.EventRequest;
+import com.company.qrcode.entity.ExternalGuest;
 import com.haulmont.cuba.security.entity.User;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -67,5 +68,28 @@ public class EventQrCodeServiceBean implements EventQrCodeService {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public byte[] generateForExternalGuest(EventRequest req, ExternalGuest guest) {
+        String text = String.join("\n",
+                "Код мероприятия: " + req.getEventCode(),
+                "Мероприятие: " + req.getEventName(),
+                "Зал: " + (req.getEventHall() != null ? req.getEventHall().getName() : ""),
+                "Дата: " + (req.getEventDate() != null ? req.getEventDate().toString() : ""),
+                "Начало: " + (req.getTimeStart() != null ? req.getTimeStart().toString() : ""),
+                "Окончание: " + (req.getTimeEnd() != null ? req.getTimeEnd().toString() : ""),
+                "Тип: Внешний гость",
+                "Фамилия: " + (guest.getLastName() != null ? guest.getLastName() : ""),
+                "Имя: " + (guest.getFirstName() != null ? guest.getFirstName() : ""),
+                "Отчество: " + (guest.getMiddleName() != null ? guest.getMiddleName() : ""),
+                "Организация: " + (guest.getOrganization() != null ? guest.getOrganization() : ""),
+                "Должность: " + (guest.getPosition() != null ? guest.getPosition() : ""),
+                "Email: " + (guest.getEmail() != null ? guest.getEmail() : ""),
+                "Телефон: " + (guest.getPhone() != null ? guest.getPhone() : ""),
+                "UUID гостя: " + guest.getId()
+        );
+
+        return generateQrCode(text);
     }
 }

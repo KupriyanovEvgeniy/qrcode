@@ -2,5 +2,11 @@
 <fts-config xmlns="http://schemas.haulmont.com/cuba/fts.xsd">
     <entities>
 
+        <entity class="com.company.qrcode.entity.ExternalGuest">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.qrcode.entity.EventExternalParticipant">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

@@ -8,6 +8,8 @@ package com.company.qrcode.service;
 
 import com.company.qrcode.entity.EventRequest;
 import com.haulmont.cuba.security.entity.User;
+import com.company.qrcode.entity.EventParticipant;
+import com.company.qrcode.entity.EventExternalParticipant;
 
 public interface EventQrCodeService {
     String NAME = "qrcode_EventQrCodeService";
@@ -15,4 +17,6 @@ public interface EventQrCodeService {
     byte[] generateQrCode(String qrText);
 
     byte[] generateForParticipant(EventRequest req, User user);
+
+    byte[] generateForExternalGuest(EventRequest req, com.company.qrcode.entity.ExternalGuest guest);
 }

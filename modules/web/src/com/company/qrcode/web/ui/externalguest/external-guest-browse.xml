@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://externalGuestBrowse.caption"
+        focusComponent="externalGuestsTable"
+        messagesPack="com.company.qrcode.web.ui.externalguest">
+    <data readOnly="true">
+        <collection id="externalGuestsDc"
+                    class="com.company.qrcode.entity.ExternalGuest">
+            <view extends="_local"/>
+            <loader id="externalGuestsDl">
+                <query>
+                    <![CDATA[select e from qrcode$ExternalGuest e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="externalGuestsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="externalGuestsTable"
+                dataLoader="externalGuestsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="externalGuestsTable"
+                    width="100%"
+                    dataContainer="externalGuestsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="lastName"/>
+                <column id="firstName"/>
+                <column id="middleName"/>
+                <column id="email"/>
+                <column id="phone"/>
+                <column id="organization"/>
+                <column id="position"/>
+                <column id="passportData"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="externalGuestsTable.create"/>
+                <button id="editBtn" action="externalGuestsTable.edit"/>
+                <button id="removeBtn" action="externalGuestsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

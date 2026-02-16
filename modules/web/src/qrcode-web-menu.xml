@@ -10,5 +10,6 @@
         <item screen="qrcode$Hall.browse" caption="mainMsg://menu_config.qrcode$Hall.browse"/>
         <item screen="qrcode$EventRequest.browse" caption="mainMsg://menu_config.qrcode$EventRequest.browse"/>
         <item screen="qrcode_Qrcodedialog" caption="mainMsg://menu_config.qrcode_Qrcodedialog"/>
+        <item screen="qrcode$ExternalGuest.browse" caption="mainMsg://menu_config.qrcode$ExternalGuest.browse"/>
     </menu>
 </menu-config>
