@@ -11,12 +11,12 @@ import com.haulmont.cuba.security.entity.User;
 import com.company.qrcode.entity.EventParticipant;
 import com.company.qrcode.entity.EventExternalParticipant;
 
+import java.util.UUID;
+
 public interface EventQrCodeService {
     String NAME = "qrcode_EventQrCodeService";
 
     byte[] generateQrCode(String qrText);
 
-    byte[] generateForParticipant(EventRequest req, User user);
-
-    byte[] generateForExternalGuest(EventRequest req, com.company.qrcode.entity.ExternalGuest guest);
+    byte[] generate(UUID eventId, UUID participantId, String participantType);
 }

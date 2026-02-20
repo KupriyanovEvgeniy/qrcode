@@ -3,4 +3,5 @@
 
     <entity metaClass="qrcode$ExternalGuest"/>
     <entity metaClass="qrcode$EventExternalParticipant"/>
+    <entity metaClass="qrcode$QrCode"/>
 </entities>

@@ -10,11 +10,12 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Table(name = "QRCODE_EVENT_EXTERNAL_PARTICIPANT")
 @Entity(name = "qrcode$EventExternalParticipant")
 @NamePattern("%s|guest")
-public class EventExternalParticipant extends StandardEntity {
+public class EventExternalParticipant extends StandardEntity implements EventParticipantView {
     private static final long serialVersionUID = -7622724998805991808L;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -72,5 +73,20 @@ public class EventExternalParticipant extends StandardEntity {
 
     public void setCheckedIn(Boolean checkedIn) {
         this.checkedIn = checkedIn;
+    }
+
+    @Override
+    public UUID getParticipantId() {
+        return getGuest() != null ? getGuest().getId() : null;
+    }
+
+    @Override
+    public String getFullName() {
+        return getGuest().getLastName() + " " + getGuest().getFirstName();
+    }
+
+    @Override
+    public String getParticipantType() {
+        return "GUEST";
     }
 }

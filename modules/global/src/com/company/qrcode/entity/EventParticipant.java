@@ -10,10 +10,11 @@ import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Table(name = "QRCODE_EVENT_PARTICIPANT")
 @Entity(name = "qrcode$EventParticipant")
-public class EventParticipant extends StandardEntity {
+public class EventParticipant extends StandardEntity implements EventParticipantView {
     private static final long serialVersionUID = -1944202429129301733L;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EVENT_REQUEST_ID")
@@ -46,5 +47,20 @@ public class EventParticipant extends StandardEntity {
 
     public void setEventRequest(EventRequest eventRequest) {
         this.eventRequest = eventRequest;
+    }
+
+    @Override
+    public UUID getParticipantId() {
+        return getUser() != null ? getUser().getId() : null;
+    }
+
+    @Override
+    public String getFullName() {
+        return getUser().getLastName() + " " + getUser().getFirstName();
+    }
+
+    @Override
+    public String getParticipantType() {
+        return "USER";
     }
 }

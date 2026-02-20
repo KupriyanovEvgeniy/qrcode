@@ -8,5 +8,8 @@
         <entity class="com.company.qrcode.entity.EventExternalParticipant">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.qrcode.entity.QrCode">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

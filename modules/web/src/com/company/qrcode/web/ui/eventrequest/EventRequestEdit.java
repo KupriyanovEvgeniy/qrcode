@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.UUID;
 
 @UiController("qrcode$EventRequest.edit")
@@ -232,41 +233,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                 .show();
     }
 
-    @Subscribe("generateExternalQrBtn")
-    public void onGenerateExternalQrBtnClick(Button.ClickEvent event) {
-        if (externalParticipantsDc.getItems().isEmpty()) {
-            notifications.create()
-                    .withCaption("Нет гостей для генерации QR-кодов")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        int generatedCount = 0;
-        EventRequest eventRequest = getEditedEntity();
-
-        for (EventExternalParticipant participant : externalParticipantsDc.getItems()) {
-            if (participant.getQrCode() == null || participant.getQrCode().length == 0) {
-                try {
-                    byte[] qrCode = eventQrCodeService.generateForExternalGuest(
-                            eventRequest,
-                            participant.getGuest()
-                    );
-                    participant.setQrCode(qrCode);
-                    generatedCount++;
-                } catch (Exception e) {
-                    log.error("Ошибка генерации QR-кода для гостя", e);
-                }
-            }
-        }
-
-        notifications.create()
-                .withCaption("QR-коды сгенерированы")
-                .withDescription("Создано: " + generatedCount)
-                .show();
-    }
-
-
     @Subscribe("addParticipantBtn")
     public void onAddParticipantBtnClick(Button.ClickEvent event) {
         User selectedUser = userPicker.getValue();
@@ -326,68 +292,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                 .show();
     }
 
-    @Subscribe("generateQrBtn")
-    public void onGenerateQrBtnClick(Button.ClickEvent event) {
-        if (participantsDc.getItems().isEmpty()) {
-            notifications.create()
-                    .withCaption("Нет участников для генерации QR-кодов")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
 
-        int generatedCount = 0;
-
-        for (EventParticipant participant : participantsDc.getItems()) {
-            if (participant.getQrCode() == null || participant.getQrCode().length == 0) {
-                try {
-                    byte[] qrCode = eventQrCodeService.generateForParticipant(
-                            getEditedEntity(),
-                            participant.getUser()
-                    );
-                    participant.setQrCode(qrCode);
-                    generatedCount++;
-                } catch (Exception e) {
-                    log.error("Ошибка генерации QR-кода", e);
-                    notifications.create()
-                            .withCaption("Ошибка генерации QR-кода")
-                            .withDescription(e.getMessage())
-                            .withType(Notifications.NotificationType.ERROR)
-                            .show();
-                }
-            }
-        }
-
-        if (generatedCount > 0) {
-            notifications.create()
-                    .withCaption("QR-коды сгенерированы")
-                    .withDescription("Создано QR-кодов: " + generatedCount)
-                    .show();
-        } else {
-            notifications.create()
-                    .withCaption("Все QR-коды уже сгенерированы")
-                    .show();
-        }
-    }
-
-    @Subscribe("showQrBtn")
-    public void onShowQrBtnClick(Button.ClickEvent event) {
-        EventParticipant selected = participantsTable.getSingleSelected();
-        if (selected == null) {
-            return;
-        }
-
-        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
-            notifications.create()
-                    .withCaption("QR-код еще не сгенерирован")
-                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        openQrCodeDialog(selected);
-    }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
@@ -405,54 +310,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             participantsDl.load();
         }
         getScreenData().loadAll();
-    }
-
-    @Subscribe("downloadQrBtn")
-    public void onDownloadQrBtnClick(Button.ClickEvent event) {
-        EventParticipant selected = participantsTable.getSingleSelected();
-        if (selected == null) {
-            notifications.create()
-                    .withCaption("Выберите участника")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
-            notifications.create()
-                    .withCaption("QR-код еще не сгенерирован")
-                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        downloadQrCode(selected);
-    }
-
-    private void downloadQrCode(EventParticipant participant) {
-        try {
-            byte[] qrBytes = participant.getQrCode();
-            User user = participant.getUser();
-            String fileName = "qr_code.png";
-            if (user != null) {
-                StringBuilder name = new StringBuilder("qr_");
-                if (user.getLastName() != null) name.append(user.getLastName());
-                if (user.getFirstName() != null) {
-                    if (user.getLastName() != null) name.append("_");
-                    name.append(user.getFirstName());
-                }
-                fileName = name.toString() + ".png";
-            }
-            downloadViaJavaScript(qrBytes, fileName);
-        } catch (Exception e) {
-            log.error("Ошибка скачивания QR-кода", e);
-            notifications.create()
-                    .withCaption("Ошибка скачивания QR-кода")
-                    .withDescription(e.getMessage())
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
-        }
     }
 
     private void downloadViaJavaScript(byte[] qrBytes, String fileName) {
@@ -485,23 +342,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         } catch (Exception e) {
             throw new RuntimeException("Ошибка скачивания через JavaScript: " + e.getMessage(), e);
         }
-    }
-
-    private void openQrCodeDialog(EventParticipant participant) {
-        byte[] qrBytes = participant.getQrCode();
-        Qrcodedialog dialog = screenBuilders.screen(this)
-                .withScreenClass(Qrcodedialog.class)
-                .withOpenMode(OpenMode.DIALOG)
-                .build();
-
-        User user = participant.getUser();
-        String caption = "QR-код участника";
-        if (user != null) {
-            caption = "QR-код: " + user.getLastName() + " " + user.getFirstName();
-        }
-        dialog.getWindow().setCaption(caption);
-        dialog.addAfterShowListener(e -> dialog.setQrCode(qrBytes));
-        dialog.show();
     }
 
     @Subscribe("sendEmailBtn")
@@ -547,27 +387,55 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Subscribe("processQrBtn")
     public void onProcessQrBtnClick(Button.ClickEvent event) {
-        if (qrFileUpload.getValue() == null) {
-            notifications.create()
-                    .withCaption("Ошибка")
-                    .withDescription("Выберите файл с QR-кодом")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
+        handleQrUpload(qrFileUpload, participantsDc.getItems());
+    }
 
-        try {
-            byte[] bytes = qrFileUpload.getBytes();
-            String qrText = decodeQrFromBytes(bytes);
-            processQrText(qrText);
-        } catch (Exception e) {
-            log.error("Ошибка обработки QR-кода", e);
-            notifications.create()
-                    .withCaption("Ошибка")
-                    .withDescription(e.getMessage())
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
+    @Subscribe("showQrBtn")
+    public void onShowQrBtnClick(Button.ClickEvent event) {
+        EventParticipant selected = participantsTable.getSingleSelected();
+        if (selected != null && selected.getQrCode() != null) {
+            openQrDialog(selected, selected.getQrCode());
         }
+    }
+
+    @Subscribe("downloadQrBtn")
+    public void onDownloadQrBtnClick(Button.ClickEvent event) {
+        EventParticipant selected = participantsTable.getSingleSelected();
+        if (selected != null) {
+            downloadQr(selected, selected.getQrCode());
+        }
+    }
+
+    @Subscribe("generateQrBtn")
+    public void onGenerateQrBtnClick(Button.ClickEvent event) {
+        generateQrCodes(participantsDc.getItems());
+    }
+
+    @Subscribe("processExternalQrBtn")
+    public void onProcessExternalQrBtnClick(Button.ClickEvent event) {
+        handleQrUpload(externalQrFileUpload, externalParticipantsDc.getItems());
+    }
+
+    @Subscribe("showExternalQrBtn")
+    public void onShowExternalQrBtnClick(Button.ClickEvent event) {
+        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
+        if (selected != null && selected.getQrCode() != null) {
+            openQrDialog(selected, selected.getQrCode());
+        }
+    }
+
+    @Subscribe("downloadExternalQrBtn")
+    public void onDownloadExternalQrBtnClick(Button.ClickEvent event) {
+        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
+
+        if (selected != null) {
+            downloadQr(selected, selected.getQrCode());
+        }
+    }
+
+    @Subscribe("generateExternalQrBtn")
+    public void onGenerateExternalQrBtnClick(Button.ClickEvent event) {
+        generateQrCodes(externalParticipantsDc.getItems());
     }
 
     private String decodeQrFromBytes(byte[] bytes) throws Exception {
@@ -578,180 +446,11 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         return result.getText();
     }
 
-    private void processQrText(String qrText) {
-        UUID userId;
-        try {
-            userId = extractUserId(qrText);
-        } catch (Exception e) {
-            notifications.create()
-                    .withCaption("Ошибка QR-кода")
-                    .withDescription("Не удалось определить пользователя")
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
-            return;
-        }
-
-        String codMero;
-        try {
-            codMero = extractCodMero(qrText);
-        } catch (Exception e) {
-            notifications.create()
-                    .withCaption("Ошибка QR-кода")
-                    .withDescription("Не удалось определить мероприятие")
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
-            return;
-        }
-
-        User user = dataManager.load(User.class)
-                .id(userId)
-                .optional()
-                .orElse(null);
-
-        if (user == null) {
-            notifications.create()
-                    .withCaption("Пользователь не найден")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        EventRequest eventRequest = getEditedEntity();
-
-        EventParticipant participant = participantsDc.getItems().stream()
-                .filter(p -> p.getUser() != null && p.getUser().getId().equals(userId))
-                .findFirst()
-                .orElse(null);
-
-        if (!codMero.equals(eventRequest.getEventCode())) {
-            notifications.create()
-                    .withCaption("Неверное мероприятие")
-                    .withDescription("Этот QR-код относится к другому мероприятию")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        if (participant == null) {
-            notifications.create()
-                    .withCaption("Пользователь не является участником")
-                    .withDescription(user.getLastName() + " " + user.getFirstName())
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        notifications.create()
-                .withCaption("Участник найден")
-                .withDescription(user.getLastName() + " " + user.getFirstName())
-                .show();
-    }
-
-    private UUID extractUserId(String qrText) {
-        for (String line : qrText.split("\n")) {
-            if (line.startsWith("UUID пользователя:")) {
-                return UUID.fromString(line.substring("UUID пользователя:".length()).trim());
-            }
-        }
-        throw new IllegalArgumentException("USER_ID not found in QR");
-    }
-
-    private String extractCodMero(String qrText) {
-        for (String line : qrText.split("\n")) {
-            if (line.startsWith("Код мероприятия:")) {
-                return line.substring("Код мероприятия:".length()).trim();
-            }
-        }
-        throw new IllegalArgumentException("Код мероприятия not found in QR");
-    }
-
-    @Subscribe("showExternalQrBtn")
-    public void onShowExternalQrBtnClick(Button.ClickEvent event) {
-        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
-        if (selected == null) {
-            return;
-        }
-
-        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
-            notifications.create()
-                    .withCaption("QR-код еще не сгенерирован")
-                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        openExternalQrCodeDialog(selected);
-    }
-
-    private void openExternalQrCodeDialog(EventExternalParticipant participant) {
-        byte[] qrBytes = participant.getQrCode();
-        Qrcodedialog dialog = screenBuilders.screen(this)
-                .withScreenClass(Qrcodedialog.class)
-                .withOpenMode(OpenMode.DIALOG)
-                .build();
-
-        ExternalGuest guest = participant.getGuest();
-        String caption = "QR-код гостя";
-        if (guest != null) {
-            caption = "QR-код: " + guest.getLastName() + " " + guest.getFirstName();
-        }
-        dialog.getWindow().setCaption(caption);
-        dialog.addAfterShowListener(e -> dialog.setQrCode(qrBytes));
-        dialog.show();
-    }
-
-    @Subscribe("downloadExternalQrBtn")
-    public void onDownloadExternalQrBtnClick(Button.ClickEvent event) {
-        EventExternalParticipant selected = externalParticipantsTable.getSingleSelected();
-        if (selected == null) {
-            notifications.create()
-                    .withCaption("Выберите гостя")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        if (selected.getQrCode() == null || selected.getQrCode().length == 0) {
-            notifications.create()
-                    .withCaption("QR-код еще не сгенерирован")
-                    .withDescription("Нажмите 'Сгенерировать QR' для создания QR-кода")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
-            return;
-        }
-
-        downloadExternalQrCode(selected);
-    }
-
-    private void downloadExternalQrCode(EventExternalParticipant participant) {
-        try {
-            byte[] qrBytes = participant.getQrCode();
-            ExternalGuest guest = participant.getGuest();
-            String fileName = "qr_code.png";
-            if (guest != null) {
-                StringBuilder name = new StringBuilder("qr_guest_");
-                if (guest.getLastName() != null) name.append(guest.getLastName());
-                if (guest.getFirstName() != null) {
-                    if (guest.getLastName() != null) name.append("_");
-                    name.append(guest.getFirstName());
-                }
-                fileName = name.toString() + ".png";
-            }
-            downloadViaJavaScript(qrBytes, fileName);
-        } catch (Exception e) {
-            log.error("Ошибка скачивания QR-кода гостя", e);
-            notifications.create()
-                    .withCaption("Ошибка скачивания QR-кода")
-                    .withDescription(e.getMessage())
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
-        }
-    }
-
-    @Subscribe("processExternalQrBtn")
-    public void onProcessExternalQrBtnClick(Button.ClickEvent event) {
-        if (externalQrFileUpload.getValue() == null) {
+    private <T extends EventParticipantView> void handleQrUpload(
+            FileUploadField uploadField,
+            Collection<T> participants
+    ) {
+        if (uploadField.getValue() == null) {
             notifications.create()
                     .withCaption("Ошибка")
                     .withDescription("Выберите файл с QR-кодом")
@@ -761,11 +460,11 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
 
         try {
-            byte[] bytes = externalQrFileUpload.getBytes();
+            byte[] bytes = uploadField.getBytes();
             String qrText = decodeQrFromBytes(bytes);
-            processExternalQrText(qrText);
+            processQrText(qrText, participants);
         } catch (Exception e) {
-            log.error("Ошибка обработки QR-кода гостя", e);
+            log.error("Ошибка обработки QR", e);
             notifications.create()
                     .withCaption("Ошибка")
                     .withDescription(e.getMessage())
@@ -774,90 +473,128 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         }
     }
 
-    private void processExternalQrText(String qrText) {
-        UUID guestId;
-        try {
-            guestId = extractGuestId(qrText);
-        } catch (Exception e) {
-            notifications.create()
-                    .withCaption("Ошибка QR-кода")
-                    .withDescription("Не удалось определить гостя")
+    private <T extends EventParticipantView> void openQrDialog(T participant, byte[] qrBytes) {
+
+        Qrcodedialog dialog = screenBuilders.screen(this)
+                .withScreenClass(Qrcodedialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        dialog.getWindow().setCaption("QR-код: " + participant.getFullName());
+
+        dialog.addAfterShowListener(e -> dialog.setQrCode(qrBytes));
+        dialog.show();
+    }
+
+    private <T extends EventParticipantView> void downloadQr(T participant, byte[] qrBytes) {
+
+        String fileName = "qr_" + participant.getFullName().replace(" ", "_") + ".png";
+
+        downloadViaJavaScript(qrBytes, fileName);
+    }
+
+    private <T extends EventParticipantView> void processQrText(String qrText,
+                                   Collection<T> participants) {
+        UUID qrCodeId;
+
+        try { qrCodeId = UUID.fromString(qrText.trim()); }
+        catch (Exception e) {
+            notifications.create().withCaption("Ошибка QR-кода")
+                    .withDescription("Не удалось расшифровать QR-код")
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
             return;
         }
 
-        String eventCode;
-        try {
-            eventCode = extractExternalEventCode(qrText);
-        } catch (Exception e) {
-            notifications.create()
-                    .withCaption("Ошибка QR-кода")
-                    .withDescription("Не удалось определить мероприятие")
-                    .withType(Notifications.NotificationType.ERROR)
-                    .show();
-            return;
-        }
-
-        ExternalGuest guest = dataManager.load(ExternalGuest.class)
-                .id(guestId)
+        QrCode qrCode = dataManager.load(QrCode.class)
+                .id(qrCodeId)
                 .optional()
                 .orElse(null);
 
-        if (guest == null) {
-            notifications.create()
-                    .withCaption("Гость не найден")
-                    .withType(Notifications.NotificationType.WARNING)
-                    .show();
+        if (qrCode == null) {
+            notifications.create().withCaption("Ошибка QR-кода")
+                .withDescription("Данный QR-код не найден")
+                .withType(Notifications.NotificationType.ERROR)
+                .show();
             return;
         }
 
         EventRequest eventRequest = getEditedEntity();
-
-        EventExternalParticipant participant = externalParticipantsDc.getItems().stream()
-                .filter(p -> p.getGuest() != null && p.getGuest().getId().equals(guestId))
-                .findFirst()
-                .orElse(null);
-
-        if (!eventCode.equals(eventRequest.getEventCode())) {
-            notifications.create()
-                    .withCaption("Неверное мероприятие")
+        if (!qrCode.getEventId().equals(eventRequest.getId())) {
+            notifications.create().withCaption("Неверное мероприятие")
                     .withDescription("Этот QR-код относится к другому мероприятию")
                     .withType(Notifications.NotificationType.WARNING)
                     .show();
             return;
         }
 
+        UUID participantId = qrCode.getParticipantId();
+
+        T participant = participants.stream()
+                .filter(p -> participantId.equals(p.getParticipantId()))
+                .findFirst()
+                .orElse(null);
+
         if (participant == null) {
-            notifications.create()
-                    .withCaption("Гость не является участником")
-                    .withDescription(guest.getLastName() + " " + guest.getFirstName())
+            notifications.create().withCaption("Пользователь не найден")
                     .withType(Notifications.NotificationType.WARNING)
                     .show();
             return;
         }
 
-        notifications.create()
-                .withCaption("Гость найден")
-                .withDescription(guest.getLastName() + " " + guest.getFirstName())
+        String participantType = qrCode.getParticipantType();
+
+        screenBuilders.editor(EventParticipant.class, this)
+                .editEntity(participant)
+                .withOpenMode(OpenMode.DIALOG)
                 .show();
     }
 
-    private UUID extractGuestId(String qrText) {
-        for (String line : qrText.split("\n")) {
-            if (line.startsWith("UUID гостя:")) {
-                return UUID.fromString(line.substring("UUID гостя:".length()).trim());
-            }
-        }
-        throw new IllegalArgumentException("Guest ID not found in QR");
-    }
+    private <T extends EventParticipantView> void generateQrCodes(Collection<T> participants) {
 
-    private String extractExternalEventCode(String qrText) {
-        for (String line : qrText.split("\n")) {
-            if (line.startsWith("Код мероприятия:")) {
-                return line.substring("Код мероприятия:".length()).trim();
+        if (participants == null || participants.isEmpty()) {
+            notifications.create()
+                    .withCaption("Нет участников для генерации QR-кодов")
+                    .withType(Notifications.NotificationType.WARNING)
+                    .show();
+            return;
+        }
+
+        int generatedCount = 0;
+
+        for (T participant : participants) {
+
+            if (participant.getQrCode() == null || participant.getQrCode().length == 0) {
+                try {
+                    byte[] qrCode = eventQrCodeService.generate(
+                            getEditedEntity().getId(),
+                            participant.getParticipantId(),
+                            participant.getParticipantType()
+                    );
+
+                    participant.setQrCode(qrCode);
+                    generatedCount++;
+
+                } catch (Exception e) {
+                    log.error("Ошибка генерации QR-кода", e);
+                    notifications.create()
+                            .withCaption("Ошибка генерации QR-кода")
+                            .withDescription(e.getMessage())
+                            .withType(Notifications.NotificationType.ERROR)
+                            .show();
+                }
             }
         }
-        throw new IllegalArgumentException("Код мероприятия not found in QR");
+
+        if (generatedCount > 0) {
+            notifications.create()
+                    .withCaption("QR-коды сгенерированы")
+                    .withDescription("Создано QR-кодов: " + generatedCount)
+                    .show();
+        } else {
+            notifications.create()
+                    .withCaption("Все QR-коды уже сгенерированы")
+                    .show();
+        }
     }
 }

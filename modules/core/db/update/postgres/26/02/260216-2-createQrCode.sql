@@ -1,0 +1,2 @@
+alter table QRCODE_QR_CODE add constraint FK_QRCODE_QR_CODE_ON_EVENT foreign key (EVENT_ID) references QRCODE_EVENT_REQUEST(ID);
+create index IDX_QRCODE_QR_CODE_ON_EVENT on QRCODE_QR_CODE (EVENT_ID);

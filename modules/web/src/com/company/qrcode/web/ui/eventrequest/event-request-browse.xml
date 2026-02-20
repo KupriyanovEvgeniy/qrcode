@@ -53,6 +53,9 @@
                 <button id="createBtn" action="eventRequestsTable.create"/>
                 <button id="editBtn" action="eventRequestsTable.edit"/>
                 <button id="removeBtn" action="eventRequestsTable.remove"/>
+                <button id="searchBtn" caption="Найти мероприятие"/>
+                <upload id="uploadField"
+                        accept="image/*"/>
             </buttonsPanel>
         </groupTable>
         <hbox id="lookupActions" spacing="true" visible="false">
