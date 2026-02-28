@@ -1,0 +1,1 @@
+alter table qrcode_event_request drop constraint FK_QRCODE_EVENT_REQUEST_ON_EVENT_HALL ;

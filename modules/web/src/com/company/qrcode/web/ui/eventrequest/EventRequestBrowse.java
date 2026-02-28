@@ -84,7 +84,6 @@ public class EventRequestBrowse extends StandardLookup<EventRequest> {
                         .show();
                 return;
             }
-            System.out.println("-----------------------");
 
             EventRequest eventRequest = dataManager.load(EventRequest.class)
                     .id(qrCode.getEventId())

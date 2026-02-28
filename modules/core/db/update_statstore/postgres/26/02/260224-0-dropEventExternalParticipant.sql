@@ -1,0 +1,1 @@
+alter table qrcode_event_external_participant rename to QRCODE_EVENT_EXTERNAL_PARTICIPANT__U84291 ;

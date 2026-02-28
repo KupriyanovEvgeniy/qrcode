@@ -1,0 +1,1 @@
+drop table if exists QRCODE_EXTERNAL_GUEST__U77707 cascade ;

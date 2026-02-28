@@ -1,0 +1,1 @@
+drop table if exists QRCODE_HALL__U83052 cascade ;

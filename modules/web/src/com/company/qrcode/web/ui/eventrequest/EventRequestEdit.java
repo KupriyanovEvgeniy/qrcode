@@ -11,6 +11,7 @@ import com.company.qrcode.service.EventCodeService;
 import com.company.qrcode.service.EventEmailService;
 import com.company.qrcode.service.EventQrCodeService;
 import com.company.qrcode.web.ui.Qrcodedialog;
+import com.company.qrcode.web.ui.externalguest.ExternalGuestEdit;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
@@ -388,6 +389,9 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     @Subscribe("processQrBtn")
     public void onProcessQrBtnClick(Button.ClickEvent event) {
         handleQrUpload(qrFileUpload, participantsDc.getItems());
+        System.out.println("!!!___ВЫВОД___!!!");
+        System.out.println(externalParticipantsDc.getItems());
+        System.out.println("!!!___ВЫВОД___!!!");
     }
 
     @Subscribe("showQrBtn")
@@ -414,6 +418,9 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
     @Subscribe("processExternalQrBtn")
     public void onProcessExternalQrBtnClick(Button.ClickEvent event) {
         handleQrUpload(externalQrFileUpload, externalParticipantsDc.getItems());
+        System.out.println("!!!___ВЫВОД___!!!");
+        System.out.println(externalParticipantsDc.getItems());
+        System.out.println("!!!___ВЫВОД___!!!");
     }
 
     @Subscribe("showExternalQrBtn")
@@ -446,10 +453,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         return result.getText();
     }
 
-    private <T extends EventParticipantView> void handleQrUpload(
-            FileUploadField uploadField,
-            Collection<T> participants
-    ) {
+    private <T extends EventParticipantView> void handleQrUpload(FileUploadField uploadField, Collection<T> participants) {
         if (uploadField.getValue() == null) {
             notifications.create()
                     .withCaption("Ошибка")
@@ -493,8 +497,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
         downloadViaJavaScript(qrBytes, fileName);
     }
 
-    private <T extends EventParticipantView> void processQrText(String qrText,
-                                   Collection<T> participants) {
+    private <T extends EventParticipantView> void processQrText(String qrText, Collection<T> participants) {
         UUID qrCodeId;
 
         try { qrCodeId = UUID.fromString(qrText.trim()); }
@@ -539,15 +542,21 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             notifications.create().withCaption("Пользователь не найден")
                     .withType(Notifications.NotificationType.WARNING)
                     .show();
-            return;
         }
+        else{
+            if(participant instanceof EventParticipant){
+                User user = ((EventParticipant) participant).getUser();
+                screenBuilders.editor(User.class, this).editEntity(user).withOpenMode(OpenMode.DIALOG).show();
+            }
+            else if(participant instanceof EventExternalParticipant){
+                ExternalGuest exGuest = ((EventExternalParticipant) participant).getGuest();
+                screenBuilders.editor(ExternalGuest.class, this).editEntity(exGuest).withOpenMode(OpenMode.DIALOG).show();
+            }
+            else{
+                notifications.create().withCaption("Ошибка обработки qr-кода").withType(Notifications.NotificationType.WARNING).show();
+            }
 
-        String participantType = qrCode.getParticipantType();
-
-        screenBuilders.editor(EventParticipant.class, this)
-                .editEntity(participant)
-                .withOpenMode(OpenMode.DIALOG)
-                .show();
+        }
     }
 
     private <T extends EventParticipantView> void generateQrCodes(Collection<T> participants) {
