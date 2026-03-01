@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://recipientListBrowse.caption"
+        focusComponent="recipientListsTable"
+        messagesPack="com.company.qrcode.web.ui.recipientlist">
+    <data readOnly="true">
+        <collection id="recipientListsDc"
+                    class="com.company.qrcode.entity.RecipientList">
+            <view extends="_local">
+                <property name="owner" view="_minimal"/>
+                <property name="recipients" view="_minimal"/>
+                <property name="share" view="_minimal"/>
+            </view>
+            <loader id="recipientListsDl">
+                <query>
+                    <![CDATA[SELECT e FROM qrcode$RecipientList e LEFT JOIN e.share s where e.accessType='A' or e.owner.id=:id or s.id=:id]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="recipientListsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="recipientListsTable"
+                dataLoader="recipientListsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="recipientListsTable"
+                    width="100%"
+                    dataContainer="recipientListsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+                <action id="refresh" type="refresh"/>
+                <action id="add" type="add"/>
+                <action id="exclude" type="exclude"/>
+                <action id="excel" type="excel"/>
+            </actions>
+            <columns>
+                <column id="name"/>
+                <column id="owner"/>
+                <column id="accessType"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="recipientListsTable.create"/>
+                <button id="editBtn" action="recipientListsTable.edit"/>
+                <button id="removeBtn" action="recipientListsTable.remove"/>
+                <button id="refreshBtn" action="recipientListsTable.refresh"/>
+                <button id="addBtn" action="recipientListsTable.add"/>
+                <button id="excludeBtn" action="recipientListsTable.exclude"/>
+                <button id="excelBtn" action="recipientListsTable.excel"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

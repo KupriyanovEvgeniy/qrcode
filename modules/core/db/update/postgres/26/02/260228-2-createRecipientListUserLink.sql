@@ -1,0 +1,2 @@
+alter table QRCODE_RECIPIENT_LIST_USER_LINK add constraint FK_RECLISUSE_ON_RECIPIENT_LIST foreign key (RECIPIENT_LIST_ID) references QRCODE_RECIPIENT_LIST(ID);
+alter table QRCODE_RECIPIENT_LIST_USER_LINK add constraint FK_RECLISUSE_ON_USER foreign key (USER_ID) references SEC_USER(ID);

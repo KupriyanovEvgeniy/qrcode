@@ -9,7 +9,9 @@
     <menu id="application" insertBefore="administration">
         <item screen="qrcode$Hall.browse" caption="mainMsg://menu_config.qrcode$Hall.browse"/>
         <item screen="qrcode$EventRequest.browse" caption="mainMsg://menu_config.qrcode$EventRequest.browse"/>
-        <item screen="qrcode_Qrcodedialog" caption="mainMsg://menu_config.qrcode_Qrcodedialog"/>
         <item screen="qrcode$ExternalGuest.browse" caption="mainMsg://menu_config.qrcode$ExternalGuest.browse"/>
+        <item screen="qrcode$RecipientList.browse" caption="mainMsg://menu_config.qrcode$RecipientList.browse"/>
+        <item screen="qrcode$Request.browse" caption="mainMsg://menu_config.qrcode$Request.browse"/>
+        <item screen="qrcode_ToChoiseCorrespondent" caption="mainMsg://menu_config.qrcode_ToChoiseCorrespondent"/>
     </menu>
 </menu-config>

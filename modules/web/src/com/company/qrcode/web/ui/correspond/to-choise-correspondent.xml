@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://toChoiseCorrespondent.caption"
+        messagesPack="com.company.qrcode.web.ui">
+    <data>
+        <collection id="selectedUsersDc" class="com.haulmont.cuba.security.entity.User" view="_local"/>
+        <collection id="recipientListsDc" class="com.company.qrcode.entity.RecipientList">
+            <view extends="_local">
+                <property name="recipients" view="_local"/>
+                <property name="share"/>
+            </view>
+            <loader id="recipientListsDl">
+                <query>
+                    <![CDATA[SELECT e FROM qrcode$RecipientList e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout spacing="true">
+        <vbox id="mainBox" height="100%" spacing="true">
+            <groupBox id="choiseUsersBox" caption="Выбранные пользователи" height="100%">
+                <table id="usersTable" dataContainer="selectedUsersDc" width="100%" height="100%">
+                    <columns>
+                        <column id="id"/>
+                        <column id="login"/>
+                    </columns>
+                    <rows/>
+                </table>
+            </groupBox>
+            <buttonsPanel id="add_remove_lists_button_panel" align="MIDDLE_CENTER">
+                <button id="addList" icon="font-icon:ARROW_UP" align="MIDDLE_CENTER"/>
+                <button id="removeList" icon="font-icon:ARROW_DOWN" align="MIDDLE_CENTER"/>
+            </buttonsPanel>
+            <groupBox id="choiseListsBox" caption="Списки" height="100%">
+                <groupTable id="listsTable" dataContainer="recipientListsDc" width="100%" height="100%">
+                    <columns>
+                        <column id="id"/>
+                        <column id="name"/>
+                    </columns>
+                    <rows/>
+                </groupTable>
+            </groupBox>
+        </vbox>
+    </layout>
+</window>

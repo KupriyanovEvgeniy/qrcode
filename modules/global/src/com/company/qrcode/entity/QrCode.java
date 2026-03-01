@@ -17,10 +17,13 @@ import java.util.UUID;
 @Entity(name = "qrcode$QrCode")
 public class QrCode extends StandardEntity {
     private static final long serialVersionUID = 3935661245130918784L;
+
     @Column(name = "EVENT")
     protected UUID eventId;
+
     @Column(name = "PARTICIPANT_TYPE")
     protected String participantType;
+
     @Column(name = "PARTICIPANT_ID")
     protected UUID participantId;
 

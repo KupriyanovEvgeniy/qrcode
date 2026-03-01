@@ -124,3 +124,58 @@ create table QRCODE_QR_CODE (
     primary key (ID)
 )^
 -- end QRCODE_QR_CODE
+-- begin QRCODE_RECIPIENT_LIST
+create table QRCODE_RECIPIENT_LIST (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255),
+    OWNER_ID uuid not null,
+    ACCESS_TYPE varchar(50),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_RECIPIENT_LIST
+-- begin QRCODE_RECIPIENT_LIST_USER_LINK
+create table QRCODE_RECIPIENT_LIST_USER_LINK (
+    RECIPIENT_LIST_ID uuid,
+    USER_ID uuid,
+    primary key (RECIPIENT_LIST_ID, USER_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_USER_LINK
+-- begin QRCODE_RECIPIENT_LIST_SHARE_LINK
+create table QRCODE_RECIPIENT_LIST_SHARE_LINK (
+    RECIPIENT_LIST_ID uuid,
+    USER_ID uuid,
+    primary key (RECIPIENT_LIST_ID, USER_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_SHARE_LINK
+-- begin QRCODE_REQUEST
+create table QRCODE_REQUEST (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_REQUEST
+-- begin QRCODE_REQUEST_USER_LINK
+create table QRCODE_REQUEST_USER_LINK (
+    REQUEST_ID uuid,
+    USER_ID uuid,
+    primary key (REQUEST_ID, USER_ID)
+)^
+-- end QRCODE_REQUEST_USER_LINK

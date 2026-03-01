@@ -11,5 +11,11 @@
         <entity class="com.company.qrcode.entity.QrCode">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.qrcode.entity.RecipientList">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.qrcode.entity.Request">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>
