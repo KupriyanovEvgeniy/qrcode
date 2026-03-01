@@ -16,11 +16,14 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.thesis.core.entity.TsUser;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @UiController("qrcode_ToChoiseCorrespondent")
 @UiDescriptor("to-choise-correspondent.xml")
@@ -41,10 +44,9 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     @Inject
     private Notifications notifications;
     @Inject
-    private CollectionContainer<RecipientList> recipientListsDc;
-    @Inject
     private CollectionLoader<RecipientList> recipientListsDl;
-
+    @Inject
+    private UserSession userSession;
     @Subscribe
     public void onInit(InitEvent event) {
         mainBox.setExpandRatio(choiseUsersBox, 1.0f);
@@ -52,6 +54,7 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     }
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        recipientListsDl.setParameter("id", userSession.getUser().getUuid());
         recipientListsDl.load();
     }
     @Subscribe("addList")
@@ -85,5 +88,12 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     }
     @Subscribe("removeList")
     public void onRemoveListClick(Button.ClickEvent event) {
+        Set<User> selectedUser = usersTable.getSelected();
+        if(selectedUser != null){
+            selectedUsersDc.getMutableItems().removeAll(selectedUser);
+        }
+        else{
+            notifications.create().withCaption("Выберите хоть одного пользователя").show();
+        }
     }
 }

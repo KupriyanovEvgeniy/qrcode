@@ -25,8 +25,6 @@ public class RecipientListEdit extends StandardEditor<RecipientList> {
     @Inject
     private UserSession userSession;
     @Inject
-    private LookupField<RecipientListAccessType> accessTypeField;
-    @Inject
     private GroupBoxLayout shareBox;
     @Subscribe
     public void onInit(InitEntityEvent<RecipientList> event) {
