@@ -87,6 +87,6 @@ public class EventExternalParticipant extends StandardEntity implements EventPar
 
     @Override
     public String getParticipantType() {
-        return "GUEST";
+        return getMetaClass().getName();
     }
 }

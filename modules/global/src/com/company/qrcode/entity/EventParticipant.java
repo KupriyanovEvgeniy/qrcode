@@ -61,6 +61,6 @@ public class EventParticipant extends StandardEntity implements EventParticipant
 
     @Override
     public String getParticipantType() {
-        return "USER";
+        return getMetaClass().getName();
     }
 }

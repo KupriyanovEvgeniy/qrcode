@@ -17,7 +17,10 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.cuba.core.entity.contracts.Id;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
@@ -30,6 +33,7 @@ import com.haulmont.cuba.security.entity.User;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import com.haulmont.cuba.core.entity.Entity;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
@@ -126,6 +130,9 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
 
     @Inject
     private Button processExternalQrBtn;
+
+    @Inject
+    private Metadata metadata;
 
 
     @Subscribe
@@ -528,11 +535,14 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
             return;
         }
 
+        String entityName = qrCode.getParticipantType();
         UUID participantId = qrCode.getParticipantId();
 
-        T participant = participants.stream()
-                .filter(p -> participantId.equals(p.getParticipantId()))
-                .findFirst()
+        MetaClass metaClass = metadata.getClassNN(entityName);
+
+        Entity<?> participant = dataManager.load(metaClass.getJavaClass())
+                .id(participantId)
+                .optional()
                 .orElse(null);
 
         if (participant == null) {
@@ -541,10 +551,7 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                     .show();
             return;
         }
-
-        String participantType = qrCode.getParticipantType();
-
-        screenBuilders.editor(EventParticipant.class, this)
+        screenBuilders.editor(metaClass.getJavaClass(), this)
                 .editEntity(participant)
                 .withOpenMode(OpenMode.DIALOG)
                 .show();
@@ -571,7 +578,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                             participant.getParticipantId(),
                             participant.getParticipantType()
                     );
-
                     participant.setQrCode(qrCode);
                     generatedCount++;
 
@@ -585,7 +591,6 @@ public class EventRequestEdit extends StandardEditor<EventRequest> {
                 }
             }
         }
-
         if (generatedCount > 0) {
             notifications.create()
                     .withCaption("QR-коды сгенерированы")
