@@ -17,5 +17,8 @@
         <entity class="com.company.qrcode.entity.Request">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.qrcode.entity.TextTemplate">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

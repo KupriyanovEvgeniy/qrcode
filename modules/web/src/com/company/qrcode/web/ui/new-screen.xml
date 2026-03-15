@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://newScreen.caption"
+        messagesPack="com.company.qrcode.web.ui">
+    <layout spacing="true">
+        <textArea id="myTextArea"
+                  caption="Описание"
+                  width="100%"
+                  resizable="false"
+                  height="200px"/>
+        <button id="firstButton" caption="Test Button"/>
+    </layout>
+</window>

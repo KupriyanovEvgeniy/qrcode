@@ -8,4 +8,5 @@
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
     <view entity="qrcode$Hall" name="hall-view" extends="_local"/>
+    <view entity="qrcode$TextTemplate" name="textTemplate-view" extends="_local"/>
 </views>

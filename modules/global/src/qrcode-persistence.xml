@@ -19,5 +19,6 @@
         <class>com.company.qrcode.entity.QrCode</class>
         <class>com.company.qrcode.entity.RecipientList</class>
         <class>com.company.qrcode.entity.Request</class>
+        <class>com.company.qrcode.entity.TextTemplate</class>
     </persistence-unit>
 </persistence>

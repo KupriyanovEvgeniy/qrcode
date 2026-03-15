@@ -1,0 +1,1 @@
+create unique index IDX_QRCODE_TEXT_TEMPLATE_UK_CODE on QRCODE_TEXT_TEMPLATE (CODE) where DELETE_TS is null ;

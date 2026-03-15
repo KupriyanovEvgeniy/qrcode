@@ -13,5 +13,7 @@
         <item screen="qrcode$RecipientList.browse" caption="mainMsg://menu_config.qrcode$RecipientList.browse"/>
         <item screen="qrcode$Request.browse" caption="mainMsg://menu_config.qrcode$Request.browse"/>
         <item screen="qrcode_ToChoiseCorrespondent" caption="mainMsg://menu_config.qrcode_ToChoiseCorrespondent"/>
+        <item screen="qrcode$TextTemplate.browse" caption="mainMsg://menu_config.qrcode$TextTemplate.browse"/>
+        <item screen="screen" caption="mainMsg://menu_config.screen"/>
     </menu>
 </menu-config>

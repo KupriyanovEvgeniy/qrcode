@@ -179,3 +179,22 @@ create table QRCODE_REQUEST_USER_LINK (
     primary key (REQUEST_ID, USER_ID)
 )^
 -- end QRCODE_REQUEST_USER_LINK
+-- begin QRCODE_TEXT_TEMPLATE
+create table QRCODE_TEXT_TEMPLATE (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    CODE varchar(20),
+    CONTENT text,
+    CATEGORY varchar(20),
+    ACTIVE boolean,
+    --
+    primary key (ID)
+)^
+-- end QRCODE_TEXT_TEMPLATE

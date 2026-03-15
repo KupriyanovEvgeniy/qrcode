@@ -12,6 +12,7 @@
                 <entry key="qrcode_EventCodeService" value="com.company.qrcode.service.EventCodeService"/>
                 <entry key="qrcode_EventQrCodeService" value="com.company.qrcode.service.EventQrCodeService"/>
                 <entry key="qrcode_EventEmailService" value="com.company.qrcode.service.EventEmailService"/>
+                <entry key="qrcode_ConstructionService" value="com.company.qrcode.service.ConstructionService"/>
             </map>
         </property>
     </bean>
