@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://personLookupScreen.caption"
+        messagesPack="com.company.qrcode.web.ui.newscreen">
+
+    <data>
+        <keyValueCollection id="personsDc">
+            <properties>
+                <property name="person"/>
+                <property name="name"/>
+                <property name="type"/>
+            </properties>
+        </keyValueCollection>
+    </data>
+
+    <layout expand="personsTable" spacing="true">
+
+        <table id="personsTable"
+               width="100%"
+               dataContainer="personsDc">
+
+            <columns>
+                <column id="name"/>
+                <column id="type"/>
+            </columns>
+
+        </table>
+
+    </layout>
+
+</window>

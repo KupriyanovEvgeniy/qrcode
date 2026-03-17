@@ -4,17 +4,17 @@
  * Use is subject to license terms.
  */
 
-package com.company.qrcode;
+package com.company.qrcode.entity.support;
 
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 
-public class uniquePerson {
+public class UniquePerson {
 
     private Entity entity;
     private MetaClass metaClass;
 
-    public uniquePerson(Entity entity) {
+    public UniquePerson(Entity entity) {
         this.entity = entity;
         this.metaClass = entity.getMetaClass();
     }
