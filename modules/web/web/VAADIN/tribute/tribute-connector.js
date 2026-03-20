@@ -1,30 +1,46 @@
-console.log("Hello1");
 window.com_company_qrcode_web_ui_AutocompleteExtension = function(){
-    console.log("Hello2");
     var connector = this;
-    console.log("Hello3");
-    var element = connector.getElement(connector.getParentId());
-    console.log("Hello4");
     var tribute;
-    console.log("Hello5");
+    var triggerChar = String.fromCharCode(8625);/*decimal Стрелка вверх-вправо 90 градусов*/
     this.onStateChange = function(){
         var templates = this.getState().templates;
         var parentId = connector.getParentId();
         var parent = connector.getElement(parentId);
-        var element = parent.querySelector('textarea') || parent.querySelector('input') || parent;
-        console.log("ДАННЫЕ:", templates);
-        console.log("ЦЕЛЕВОЙ ЭЛЕМЕНТ:", element);
-        console.log("Hello6");
+        var element = parent.querySelector('textarea')||parent.querySelector('input')||parent;
         var templates = this.getState().templates;
-        console.log("Hello7");
-        if (!templates || templates.length === 0){
-            console.log("NULL СПИСОК ШАБЛОНОВ ПУСТ");
+        if (!templates||templates.length===0){
             return;}
-        console.log("Hello8");
-        tribute = new Tribute({values: templates.map(function(t){return {key: t.code, value: t.content};}),trigger: '/',selectTemplate: function(item){return item.original.value;},menuItemTemplate: function(item){return '<span style="font-weight:bold">' + item.original.key + '</span>' + '<span style="color:gray">' + item.original.value.substring(0,20) + '...</span>';}});
-        console.log("Hello9");
+        tribute = new Tribute({
+            values: templates.map(function(t){
+                return {key: t.code, value: t.content};
+            }),
+            trigger: triggerChar,
+            requireLeadingSpace: false,
+            selectTemplate:function(item){
+                return item.original.value;
+            },
+            menuItemTemplate:function(item){
+                return '<span style="font-weight:bold">'
+                +item.original.key+'</span>'+'<span style="color:gray">'
+                +item.original.value.substring(0,20)+'...</span>';
+            }});
         tribute.attach(element);
-        console.log("Hello10");
+        element.addEventListener('keydown', function(e){
+            if(e.key==='F2'){
+                console.log("Нажата клавиша F2")
+                e.preventDefault();
+                var startPos = element.selectionStart;
+                var endPos = element.selectionEnd;
+                var text = element.value;
+                element.value = text.substring(0, startPos)
+                +triggerChar
+                +text.substring(endPos);
+                var newCursorPos = startPos+triggerChar.length;
+                element.setSelectionRange(newCursorPos, newCursorPos);
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                tribute.showMenuFor(element);
+            }
+            console.log("Проверка не сработала")
+        })
     };
-    console.log("Hello11");
 };
