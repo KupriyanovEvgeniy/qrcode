@@ -27,9 +27,6 @@ public class ScreenEventListener {
 
     @EventListener
     public void onScreenAfterInit(Screen.AfterInitEvent event){
-        System.out.println("!!!!!!!!!!!!!_ВЫВОД1_!!!!!!!!!!!!!!");
-        System.out.println(event.getSource().getId());
-        System.out.println("!!!!!!!!!!!!!_ВЫВОД1_!!!!!!!!!!!!!!");
         Screen screen = event.getSource();
         List<TextTemplate> templates = constructionService.getActiveConstructions();
         applyAutocomplete(screen.getWindow(), templates);
@@ -38,9 +35,6 @@ public class ScreenEventListener {
     private void applyAutocomplete(ComponentContainer container, List<TextTemplate> templates){
         for(Component c: container.getOwnComponents()){
             if (c instanceof TextField || c instanceof TextArea){
-                System.out.println("!!!!!!!!!!!!!_ВЫВОД2_!!!!!!!!!!!!!!");
-                System.out.println(c.getId());
-                System.out.println("!!!!!!!!!!!!!_ВЫВОД2_!!!!!!!!!!!!!!");
                 if(c instanceof WebAbstractComponent){
                     com.vaadin.ui.AbstractComponent vComponent = ((WebAbstractComponent<?>) c)
                             .unwrap(com.vaadin.ui.AbstractComponent.class);

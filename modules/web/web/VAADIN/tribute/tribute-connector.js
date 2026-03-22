@@ -1,16 +1,19 @@
 window.com_company_qrcode_web_ui_AutocompleteExtension = function(){
     var connector = this;
-    var tribute;
     var triggerChar = String.fromCharCode(8625);/*decimal Стрелка вверх-вправо 90 градусов*/
     var lastTriggerPos = -1;
+    var tribute = null;
     this.onStateChange = function(){
         var templates = this.getState().templates;
-        var parentId = connector.getParentId();
-        var parent = connector.getElement(parentId);
+        var parent = connector.getElement(connector.getParentId());
         var element = parent.querySelector('textarea')||parent.querySelector('input')||parent;
-        var templates = this.getState().templates;
-        if (!templates||templates.length===0){
-            return;}
+        if (!templates||templates.length===0){return 1;}
+        if(tribute){
+            tribute.collection[0].values = templates.map(function(t){
+                return {key:t.code, value:t.content};
+            });
+            return;
+        }
         tribute = new Tribute({
             values: templates.map(function(t){
                 return {key: t.code, value: t.content};
@@ -27,13 +30,17 @@ window.com_company_qrcode_web_ui_AutocompleteExtension = function(){
             }});
         tribute.attach(element);
         element.addEventListener('keydown', function(e){
+        if(tribute.isActive) return;
             if(e.key==='F2'){
                 if(e.repeat){
                     e.preventDefault();
                     return;
                 }
+                if(element.value.includes(triggerChar)){
+                    e.preventDefault();
+                    return;
+                }
                 e.preventDefault();
-                if(tribute.isActive) return;
                 var startPos = element.selectionStart;
                 var text = element.value;
                 lastTriggerPos = startPos;
@@ -49,6 +56,7 @@ window.com_company_qrcode_web_ui_AutocompleteExtension = function(){
         });
         element.addEventListener('tribute-active-false', function(e){
             setTimeout(function(){
+                if(tribute.isActive) return;
                 if(lastTriggerPos!==-1){
                     var text = element.value;
                     if(text.charAt(lastTriggerPos)===triggerChar){
@@ -60,7 +68,7 @@ window.com_company_qrcode_web_ui_AutocompleteExtension = function(){
                     }
                     lastTriggerPos=-1;
                 }
-            }, 20);
+            }, 200);
         });
         element.addEventListener('tribute-replaced', function(){
             lastTriggerPos = -1;

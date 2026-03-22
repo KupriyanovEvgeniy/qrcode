@@ -26,10 +26,8 @@ public class RecipientListBrowse extends StandardLookup<RecipientList> {
     private CollectionLoader<RecipientList> recipientListsDl;
     @Inject
     private UserSession userSession;
-
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         recipientListsDl.setParameter("id", userSession.getUser().getUuid());
     }
-    
 }

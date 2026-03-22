@@ -11,14 +11,14 @@ import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import javax.annotation.Nullable;
 
 
-public enum RecipientListAccessType implements EnumClass<String> {
+public enum AccessType implements EnumClass<String> {
 
     GLOBAL("A"),
     PRIVATE("B");
 
     private String id;
 
-    RecipientListAccessType(String value) {
+    AccessType(String value) {
         this.id = value;
     }
 
@@ -27,8 +27,8 @@ public enum RecipientListAccessType implements EnumClass<String> {
     }
 
     @Nullable
-    public static RecipientListAccessType fromId(String id) {
-        for (RecipientListAccessType at : RecipientListAccessType.values()) {
+    public static AccessType fromId(String id) {
+        for (AccessType at : AccessType.values()) {
             if (at.getId().equals(id)) {
                 return at;
             }

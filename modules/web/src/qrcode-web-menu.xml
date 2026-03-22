@@ -15,5 +15,7 @@
         <item screen="qrcode_ToChoiseCorrespondent" caption="mainMsg://menu_config.qrcode_ToChoiseCorrespondent"/>
         <item screen="qrcode$TextTemplate.browse" caption="mainMsg://menu_config.qrcode$TextTemplate.browse"/>
         <item screen="screen" caption="mainMsg://menu_config.screen"/>
+        <item screen="qrcode$TemplateCategories.browse"
+              caption="mainMsg://menu_config.qrcode$TemplateCategories.browse"/>
     </menu>
 </menu-config>

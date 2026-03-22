@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
-  ~ Haulmont Samara proprietary and confidential.
-  ~ Use is subject to license terms.
-  -->
-
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://textTemplateBrowse.caption"
@@ -13,10 +7,13 @@
     <data readOnly="true">
         <collection id="textTemplatesDc"
                     class="com.company.qrcode.entity.TextTemplate">
-            <view extends="_local"/>
+            <view extends="_local">
+                <property name="owner" view="_minimal"/>
+                <property name="category" view="_minimal"/>
+            </view>
             <loader id="textTemplatesDl">
                 <query>
-                    <![CDATA[select e from qrcode$TextTemplate e]]>
+                    <![CDATA[SELECT e FROM qrcode$TextTemplate e LEFT JOIN e.share s where e.accessType='A' or e.owner.id=:id or s.id=:id]]>
                 </query>
             </loader>
         </collection>
@@ -25,24 +22,20 @@
                 width="800"/>
     <layout expand="textTemplatesTable"
             spacing="true">
-        <filter id="filter"
-                applyTo="textTemplatesTable"
-                dataLoader="textTemplatesDl">
-            <properties include=".*"/>
-        </filter>
-        <groupTable id="textTemplatesTable"
-                    width="100%"
-                    dataContainer="textTemplatesDc">
+        <groupTable id="textTemplatesTable" width="100%" dataContainer="textTemplatesDc" multiselect="true">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <group>
+                    <column id="category"></column>
+                </group>
                 <column id="code"/>
                 <column id="content"/>
-                <column id="category"/>
                 <column id="active"/>
+                <column id="accessType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
@@ -56,5 +49,8 @@
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>
         </hbox>
+        <buttonsPanel id="bottomButtonsPanel" alwaysVisible="true">
+            <button id="selectCategory" caption="testButton"/>
+        </buttonsPanel>
     </layout>
 </window>

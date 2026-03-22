@@ -1,1 +1,0 @@
-drop table if exists QRCODE_EVENT_REQUEST__U66083 cascade ;

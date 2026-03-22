@@ -1,1 +1,0 @@
-drop table if exists QRCODE_EVENT_PARTICIPANT__U60250 cascade ;

@@ -7,4 +7,5 @@
     <entity metaClass="qrcode$RecipientList"/>
     <entity metaClass="qrcode$Request"/>
     <entity metaClass="qrcode$TextTemplate"/>
+    <entity metaClass="qrcode$TemplateCategories"/>
 </entities>

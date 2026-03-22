@@ -22,7 +22,10 @@ import java.util.Map;
 public class AutocompleteExtension extends AbstractJavaScriptExtension {
     public AutocompleteExtension(AbstractComponent target, List<TextTemplate> templates){
         super(target);
-        this.getState().templates = templates.stream().map(t->{
+        setTemplates(templates);
+    }
+    public void setTemplates(List<TextTemplate> templates){
+        getState().templates = templates.stream().map(t->{
             Map<String, String> map = new HashMap<>();
             map.put("code", t.getCode());
             map.put("content", t.getContent());

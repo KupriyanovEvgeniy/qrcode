@@ -1,1 +1,0 @@
-drop table if exists QRCODE_QR_CODE__U74874 cascade ;

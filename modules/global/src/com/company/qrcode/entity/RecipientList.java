@@ -25,13 +25,13 @@ public class RecipientList extends StandardEntity {
     protected String name;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "OWNER_ID", unique = true)
-    protected User owner;
-
-    @NotNull
     @Column(name = "ACCESS_TYPE", nullable = false)
     protected String accessType;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "OWNER_ID")
+    protected User owner;
 
     @JoinTable(name = "QRCODE_RECIPIENT_LIST_USER_LINK", joinColumns = @JoinColumn(name = "RECIPIENT_LIST_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
     @ManyToMany
@@ -46,11 +46,11 @@ public class RecipientList extends StandardEntity {
         this.owner = owner;
     }
 
-    public RecipientListAccessType getAccessType() {
-        return accessType == null ? null : RecipientListAccessType.fromId(accessType);
+    public AccessType getAccessType() {
+        return accessType == null ? null : AccessType.fromId(accessType);
     }
 
-    public void setAccessType(RecipientListAccessType accessType) {
+    public void setAccessType(AccessType accessType) {
         this.accessType = accessType == null ? null : accessType.getId();
     }
 

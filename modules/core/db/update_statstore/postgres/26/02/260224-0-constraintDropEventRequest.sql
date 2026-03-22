@@ -1,2 +1,0 @@
-alter table qrcode_event_external_participant drop constraint FK_QRCODE_EVENT_EXTERNAL_PARTICIPANT_ON_EVENT_REQUEST ;
-alter table qrcode_event_participant drop constraint FK_QRCODE_EVENT_PARTICIPANT_ON_EVENT_REQUEST ;

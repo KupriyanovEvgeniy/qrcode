@@ -6,7 +6,6 @@
 
 package com.company.qrcode.web.ui;
 
-import com.company.qrcode.entity.TextTemplate;
 import com.vaadin.shared.JavaScriptExtensionState;
 
 import java.util.List;

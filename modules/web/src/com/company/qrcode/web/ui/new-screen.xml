@@ -2,12 +2,14 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://newScreen.caption"
         messagesPack="com.company.qrcode.web.ui">
+    <actions>
+        <action id="openTemplateLists" shortcut="F1"/>
+    </actions>
     <layout spacing="true">
         <textArea id="myTextArea"
                   caption="Описание"
                   width="100%"
                   resizable="false"
                   height="200px"/>
-        <button id="firstButton" caption="Test Button"/>
     </layout>
 </window>

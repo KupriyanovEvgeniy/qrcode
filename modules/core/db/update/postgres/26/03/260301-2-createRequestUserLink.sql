@@ -1,2 +1,0 @@
-alter table QRCODE_REQUEST_USER_LINK add constraint FK_REQUSE_ON_REQUEST foreign key (REQUEST_ID) references QRCODE_REQUEST(ID);
-alter table QRCODE_REQUEST_USER_LINK add constraint FK_REQUSE_ON_USER foreign key (USER_ID) references SEC_USER(ID);
