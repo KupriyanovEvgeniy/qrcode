@@ -6,24 +6,20 @@
 
 package com.company.qrcode.web.ui.recipientlist;
 
-import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.qrcode.entity.RecipientList;
+import com.company.qrcode.entity.RecipientUserList;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 @UiController("qrcode$RecipientList.browse")
 @UiDescriptor("recipient-list-browse.xml")
 @LookupComponent("recipientListsTable")
 @LoadDataBeforeShow
-public class RecipientListBrowse extends StandardLookup<RecipientList> {
+public class RecipientListBrowse extends StandardLookup<RecipientUserList> {
     @Inject
-    private CollectionLoader<RecipientList> recipientListsDl;
+    private CollectionLoader<RecipientUserList> recipientListsDl;
     @Inject
     private UserSession userSession;
 

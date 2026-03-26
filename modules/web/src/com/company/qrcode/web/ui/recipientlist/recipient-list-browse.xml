@@ -12,7 +12,7 @@
         messagesPack="com.company.qrcode.web.ui.recipientlist">
     <data readOnly="true">
         <collection id="recipientListsDc"
-                    class="com.company.qrcode.entity.RecipientList">
+                    class="com.company.qrcode.entity.RecipientUserList">
             <view extends="_local">
                 <property name="owner" view="_minimal"/>
                 <property name="recipients" view="_minimal"/>

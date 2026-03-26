@@ -3,27 +3,65 @@
         caption="msg://toChoiseCorrespondent.caption"
         messagesPack="com.company.qrcode.web.ui">
     <data>
-        <collection id="selectedUsersDc" class="com.haulmont.cuba.security.entity.User" view="_local"/>
-        <collection id="recipientListsDc" class="com.company.qrcode.entity.RecipientList">
+        <collection id="recipientUsersListsDc" class="com.company.qrcode.entity.RecipientUserList">
             <view extends="_local">
                 <property name="recipients" view="_local"/>
                 <property name="share"/>
             </view>
-            <loader id="recipientListsDl">
+            <loader id="recipientUserListsDl">
                 <query>
                     <![CDATA[SELECT e FROM qrcode$RecipientList e LEFT JOIN e.share s where e.accessType='A' or e.owner.id=:id or s.id=:id]]>
                 </query>
             </loader>
             <collection id="usersInListDc" property="recipients"/>
         </collection>
+        <keyValueCollection id="selectedItemsDc">
+            <properties>
+                <property name="entity"/>
+                <property name="name"/>
+                <property name="type"/>
+            </properties>
+        </keyValueCollection>
+
+        <collection id="recipientsIndividualListsDc" class="com.company.qrcode.entity.RecipientIndividualList">
+            <view extends="_local">
+                <property name="recipients" view="_local"/>
+                <property name="share"/>
+            </view>
+            <loader id="recipientsIndividualListsDl">
+                <query>
+                    <![CDATA[SELECT e FROM qrcode$RecipientIndividualList e LEFT JOIN e.share s where e.accessType='A' or e.owner.id=:id or s.id=:id]]>
+                </query>
+            </loader>
+            <collection id="individualInListDc" property="recipients"/>
+        </collection>
+
+        <collection id="companiesDc"
+                    class="com.haulmont.thesis.core.entity.Company"
+                    view="_local">
+            <loader id="companiesDl">
+                <query><![CDATA[select c from df$Company c]]></query>
+            </loader>
+        </collection>
+
+        <collection id="departmentsDc"
+                    class="com.haulmont.thesis.core.entity.Department"
+                    view="_local">
+            <loader id="departmentsDl">
+                <query><![CDATA[select d from df$Department d]]></query>
+            </loader>
+        </collection>
     </data>
+
     <layout spacing="true">
         <vbox id="mainBox" height="100%" spacing="true">
             <groupBox id="choiseUsersBox" caption="Выбранные пользователи" height="100%">
-                <table id="usersTable" dataContainer="selectedUsersDc" width="100%" height="100%" multiselect="true">
+                <table id="selectedTable"
+                       dataContainer="selectedItemsDc"
+                       width="100%" height="100%" multiselect="true">
                     <columns>
-                        <column id="id"/>
-                        <column id="login"/>
+                        <column id="name"/>
+                        <column id="type"/>
                     </columns>
                     <rows/>
                 </table>
@@ -33,27 +71,63 @@
                 <button id="removeList" icon="font-icon:ARROW_DOWN" align="MIDDLE_CENTER"/>
             </buttonsPanel>
             <groupBox id="choiseListsBox" height="100%">
-                <split id="listsSplit" orientation="horizontal" locked="true">
-                    <vbox id="viewList" height="100%" width="100%" expand="listsTable">
-                        <label id="labelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
-                        <table id="listsTable" dataContainer="recipientListsDc" width="100%" height="100%">
-                            <columns>
-                                <column id="id"/>
-                                <column id="name"/>
-                            </columns>
-                        </table>
-                    </vbox>
-                    <vbox id="viewDetailList" height="100%" width="100%" expand="listsDetailTable">
-                        <label id="labelDetailList" value="Пользователи в списке:" align="MIDDLE_CENTER" stylename="h4"/>
-                        <table id="listsDetailTable" dataContainer="usersInListDc" width="100%" height="100%" editable="false">
-                            <columns>
-                                <column id="id"/>
-                                <column id="name"/>
-                            </columns>
-                        </table>
-                    </vbox>
-                </split>
+                <tabSheet id="entityTabs" width="100%" height="100%">
+                    <tab id="usersTab" caption="Сотрудники">
+                        <split id="usersListsSplit" orientation="horizontal" locked="true">
+                            <vbox id="usersViewList" height="100%" width="100%" expand="usersListsTable">
+                                <label id="usersLabelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="usersListsTable" dataContainer="recipientUsersListsDc" width="100%">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+                            <vbox id="usersViewDetailList" height="100%" width="100%" expand="usersListsDetailTable">
+                                <label id="usersLabelDetailList" value="Пользователи в списке:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="usersListsDetailTable" dataContainer="usersInListDc" width="100%" height="100%" editable="false">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+                        </split>
+                    </tab>
+                    <tab id="individualsTab" caption="Физ лица">
+                        <split id="individualsListSplit" orientation="horizontal" locked="true">
+                            <vbox id="individualsViewList" height="100%" width="100%" expand="individualsListTable">
+                                <label id="individualsLabelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="individualsListTable" dataContainer="recipientsIndividualListsDc" width="100%" height="100%">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+                            <vbox id="individualsViewDetailList" height="100%" width="100%" expand="individualsListsDetailTable">
+                                <label id="individualsLabelDetailList" value="Пользователи в списке:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="individualsListsDetailTable" dataContainer="individualInListDc" width="100%" height="100%" editable="false">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+                        </split>
+                    </tab>
+
+                    <tab id="companiesTab" caption="Юр лица">
+                    </tab>
+
+                    <tab id="departmentsTab" caption="Подразделения">
+                    </tab>
+                </tabSheet>
             </groupBox>
         </vbox>
+        <hbox id="lookupActions" spacing="true">
+            <button id="selectBtn" caption="Выбрать"/>
+            <button id="cancelBtn" caption="Отмена"/>
+        </hbox>
     </layout>
 </window>

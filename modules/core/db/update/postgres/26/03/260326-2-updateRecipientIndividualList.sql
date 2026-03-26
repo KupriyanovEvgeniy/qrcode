@@ -1,0 +1,6 @@
+alter table QRCODE_RECIPIENT_INDIVIDUAL_LIST rename column owner_id to owner_id__u10314 ;
+alter table QRCODE_RECIPIENT_INDIVIDUAL_LIST alter column owner_id__u10314 drop not null ;
+alter table QRCODE_RECIPIENT_INDIVIDUAL_LIST drop constraint FK_QRCODE_RECIPIENT_INDIVIDUAL_LIST_ON_OWNER ;
+drop index IDX_QRCODE_RECIPIENT_INDIVIDUAL_LIST_UK_OWNER_ID ;
+drop index IDX_QRCODE_RECIPIENT_INDIVIDUAL_LIST_ON_OWNER ;
+alter table QRCODE_RECIPIENT_INDIVIDUAL_LIST add column OWNER_ID uuid not null ;

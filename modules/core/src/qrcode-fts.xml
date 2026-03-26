@@ -11,10 +11,13 @@
         <entity class="com.company.qrcode.entity.QrCode">
             <include re=".*"/>
         </entity>
-        <entity class="com.company.qrcode.entity.RecipientList">
+        <entity class="com.company.qrcode.entity.RecipientUserList">
             <include re=".*"/>
         </entity>
         <entity class="com.company.qrcode.entity.Request">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.qrcode.entity.RecipientIndividualList">
             <include re=".*"/>
         </entity>
     </entities>

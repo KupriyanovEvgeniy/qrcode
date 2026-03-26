@@ -93,23 +93,23 @@ public class PersonLookupScreen extends Screen implements LookupScreen {
     @Subscribe
     public void onInit(InitEvent event) {
 
-        personsTable.addItemClickListener(clickEvent -> {
-
-            if (!clickEvent.isDoubleClick())
-                return;
-
-            if (selectHandler != null) {
-
-                KeyValueEntity item = (KeyValueEntity) clickEvent.getItem();
-
-                List<KeyValueEntity> selected = List.of(item);
-
-                if (selectValidator == null || selectValidator.test(selected)) {
-                    selectHandler.accept(selected);
-                    close(StandardOutcome.SELECT);
-                }
-            }
-        });
+//        personsTable.addItemClickListener(clickEvent -> {
+//
+//            if (!clickEvent.isDoubleClick())
+//                return;
+//
+//            if (selectHandler != null) {
+//
+//                KeyValueEntity item = (KeyValueEntity) clickEvent.getItem();
+//
+//                List<KeyValueEntity> selected = List.of(item);
+//
+//                if (selectValidator == null || selectValidator.test(selected)) {
+//                    selectHandler.accept(selected);
+//                    close(StandardOutcome.SELECT);
+//                }
+//            }
+//        });
     }
 
     @Override

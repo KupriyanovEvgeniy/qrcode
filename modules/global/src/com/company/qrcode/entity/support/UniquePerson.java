@@ -30,4 +30,22 @@ public class UniquePerson {
     public String getType() {
         return metaClass.getName();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UniquePerson)) return false;
+        UniquePerson that = (UniquePerson) o;
+        return entity.equals(that.entity);
+    }
+
+    @Override
+    public int hashCode() {
+        return entity.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return entity.getInstanceName();
+    }
 }

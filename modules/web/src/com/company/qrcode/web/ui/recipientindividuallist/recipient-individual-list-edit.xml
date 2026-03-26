@@ -6,12 +6,12 @@
   -->
 
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        caption="msg://recipientListEdit.caption"
+        caption="msg://recipientIndividualListEdit.caption"
         focusComponent="form"
-        messagesPack="com.company.qrcode.web.ui.recipientlist">
+        messagesPack="com.company.qrcode.web.ui.recipientindividuallist">
     <data>
-        <instance id="recipientListDc"
-                  class="com.company.qrcode.entity.RecipientUserList">
+        <instance id="recipientsIndividualListDc"
+                  class="com.company.qrcode.entity.RecipientIndividualList">
             <view extends="_local">
                 <property name="owner" view="_minimal"/>
                 <property name="recipients" view="_minimal"/>
@@ -25,20 +25,19 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="recipientListDc">
-            <column width="550px">
+        <form id="form" dataContainer="recipientsIndividualListDc">
+            <column width="350px">
                 <textField id="nameField" property="name"/>
                 <lookupField id="accessTypeField" property="accessType"/>
             </column>
         </form>
-        <groupBox id="recipientsBox" caption="msg://com.company.qrcode.entity/RecipientUserList.recipients">
+        <groupBox id="recipientsBox" caption="msg://com.company.qrcode.entity/RecipientIndividualList.recipients">
             <table id="recipientsTable" dataContainer="recipientsDc" width="100%" height="200px">
                 <actions>
                     <action id="add" type="add"/>
                     <action id="exclude" type="exclude"/>
                 </actions>
                 <columns>
-                    <column id="login"/>
                     <column id="name"/>
                 </columns>
                 <buttonsPanel>

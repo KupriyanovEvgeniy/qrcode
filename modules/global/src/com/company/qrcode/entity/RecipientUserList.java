@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "QRCODE_RECIPIENT_LIST")
 @Entity(name = "qrcode$RecipientList")
 @NamePattern("%s|name")
-public class RecipientList extends StandardEntity {
+public class RecipientUserList extends StandardEntity {
     private static final long serialVersionUID = 2154056221693723142L;
 
     @NotNull
