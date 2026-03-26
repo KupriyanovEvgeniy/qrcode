@@ -50,7 +50,7 @@
             <button action="lookupCancelAction"/>
         </hbox>
         <buttonsPanel id="bottomButtonsPanel" alwaysVisible="true">
-            <button id="selectCategory" caption="testButton"/>
+            <button id="selectCategory" caption="Применить"/>
         </buttonsPanel>
     </layout>
 </window>
