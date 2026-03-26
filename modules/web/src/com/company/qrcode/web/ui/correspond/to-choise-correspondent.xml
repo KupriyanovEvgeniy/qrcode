@@ -69,6 +69,7 @@
 
     <layout spacing="true">
         <vbox id="mainBox" height="100%" spacing="true">
+            <button id="addOneBtn" caption="+"/>
             <groupBox id="choiseUsersBox" caption="Выбранные пользователи" height="100%">
                 <table id="selectedTable"
                        dataContainer="selectedItemsDc"

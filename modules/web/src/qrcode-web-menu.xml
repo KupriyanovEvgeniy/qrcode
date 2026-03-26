@@ -17,5 +17,6 @@
         <item screen="qrcode_PersonLookupScreen" caption="mainMsg://menu_config.qrcode_PersonLookupScreen"/>
         <item screen="qrcode$RecipientIndividualList.browse"
               caption="mainMsg://menu_config.qrcode$RecipientIndividualList.browse"/>
+        <item screen="qrcode_SingleEntitySelect" caption="mainMsg://menu_config.qrcode_SingleEntitySelect"/>
     </menu>
 </menu-config>

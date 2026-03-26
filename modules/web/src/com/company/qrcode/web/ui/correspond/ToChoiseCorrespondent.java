@@ -8,8 +8,10 @@ package com.company.qrcode.web.ui.correspond;
 
 import com.company.qrcode.entity.RecipientIndividualList;
 import com.company.qrcode.entity.RecipientUserList;
+import com.company.qrcode.web.ui.singleentityselect.SingleEntitySelect;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.KeyValueCollectionContainer;
@@ -54,6 +56,8 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     private CollectionLoader<RecipientIndividualList> recipientsIndividualListsDl;
     @Inject
     private TabSheet entityTabs;
+    @Inject
+    ScreenBuilders screenBuilders = new ScreenBuilders();
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -222,5 +226,33 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     @Subscribe("cancelBtn")
     public void onCancelBtnClick(Button.ClickEvent event) {
         close(StandardOutcome.CLOSE);
+    }
+
+    @Subscribe("addOneBtn")
+    public void onAddOneBtnClick(Button.ClickEvent event) {
+
+        Screen screen = screenBuilders.screen(this)
+                .withScreenClass(SingleEntitySelect.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+        screen.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.SELECT) && screen instanceof SingleEntitySelect) {
+
+                SingleEntitySelect selectScreen = (SingleEntitySelect) screen;
+                Collection<Entity> selected = selectScreen.getSelectedEntities();
+
+                if (selected != null) {
+                    for (Entity entity : selected) {
+                        if (entity != null) {
+                            String name = entity.getInstanceName();
+                            addToSelected(entity, name != null ? name : "Без имени");
+                        }
+                    }
+                }
+            }
+        });
+
+        screen.show();
     }
 }

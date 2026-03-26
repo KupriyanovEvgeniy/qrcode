@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://singleEntitySelect.caption"
+        messagesPack="com.company.qrcode.web.ui.singleentityselect">
+    <data>
+
+        <collection id="usersDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_local">
+            <loader id="usersDl">
+                <query><![CDATA[
+                    select u from sec$User u order by u.name
+                ]]></query>
+            </loader>
+        </collection>
+
+        <collection id="individualsDc"
+                    class="com.haulmont.thesis.core.entity.Individual"
+                    view="_local">
+            <loader id="individualsDl">
+                <query><![CDATA[
+                    select i from df$Individual i order by i.name
+                ]]></query>
+            </loader>
+        </collection>
+
+        <collection id="companiesDc"
+                    class="com.haulmont.thesis.core.entity.Company"
+                    view="_local">
+            <loader id="companiesDl">
+                <query><![CDATA[
+                    select c from df$Company c order by c.name
+                ]]></query>
+            </loader>
+        </collection>
+
+        <collection id="departmentsDc"
+                    class="com.haulmont.thesis.core.entity.Department"
+                    view="_local">
+            <loader id="departmentsDl">
+                <query><![CDATA[
+                    select d from df$Department d order by d.name
+                ]]></query>
+            </loader>
+        </collection>
+
+    </data>
+
+    <dialogMode width="900" height="600"/>
+
+    <layout spacing="true" expand="tabs">
+
+        <tabSheet id="tabs" width="100%" height="100%">
+
+            <tab id="usersTab" caption="Сотрудники">
+                <table id="usersTable"
+                       dataContainer="usersDc"
+                       width="100%"
+                       height="100%"
+                       multiselect="true">
+                    <columns>
+                        <column id="login"/>
+                        <column id="name"/>
+                    </columns>
+                    <rowsCount/>
+                </table>
+            </tab>
+
+            <tab id="individualsTab" caption="Физ лица">
+                <table id="individualsTable"
+                       dataContainer="individualsDc"
+                       width="100%"
+                       height="100%"
+                       multiselect="true">
+                    <columns>
+                        <column id="name"/>
+                    </columns>
+                    <rowsCount/>
+                </table>
+            </tab>
+
+            <tab id="companiesTab" caption="Юр лица">
+                <table id="companiesTable"
+                       dataContainer="companiesDc"
+                       width="100%"
+                       height="100%"
+                       multiselect="true">
+                    <columns>
+                        <column id="name"/>
+                    </columns>
+                    <rowsCount/>
+                </table>
+            </tab>
+
+            <tab id="departmentsTab" caption="Подразделения">
+                <table id="departmentsTable"
+                       dataContainer="departmentsDc"
+                       width="100%"
+                       height="100%"
+                       multiselect="true">
+                    <columns>
+                        <column id="name"/>
+                    </columns>
+                    <rowsCount/>
+                </table>
+            </tab>
+
+        </tabSheet>
+
+        <hbox id="actionsBox" spacing="true">
+            <button id="selectBtn" caption="Выбрать" stylename="primary"/>
+            <button id="cancelBtn" caption="Отмена"/>
+        </hbox>
+
+    </layout>
+</window>
