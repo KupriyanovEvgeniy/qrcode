@@ -36,20 +36,34 @@
             <collection id="individualInListDc" property="recipients"/>
         </collection>
 
-        <collection id="companiesDc"
-                    class="com.haulmont.thesis.core.entity.Company"
-                    view="_local">
-            <loader id="companiesDl">
-                <query><![CDATA[select c from df$Company c]]></query>
+        <collection id="recipientCompaniesListsDc" class="com.company.qrcode.entity.RecipientCompanyList">
+            <view extends="_local">
+                <property name="recipients" view="_local"/>
+                <property name="share"/>
+            </view>
+            <loader id="recipientCompaniesListsDl">
+                <query><![CDATA[
+            SELECT e FROM qrcode$RecipientCompanyList e
+            LEFT JOIN e.share s
+            WHERE e.accessType='A' OR e.owner.id=:id OR s.id=:id
+        ]]></query>
             </loader>
+            <collection id="companiesInListDc" property="recipients"/>
         </collection>
 
-        <collection id="departmentsDc"
-                    class="com.haulmont.thesis.core.entity.Department"
-                    view="_local">
-            <loader id="departmentsDl">
-                <query><![CDATA[select d from df$Department d]]></query>
+        <collection id="recipientDepartmentsListsDc" class="com.company.qrcode.entity.RecipientDepartmentList">
+            <view extends="_local">
+                <property name="recipients" view="_local"/>
+                <property name="share"/>
+            </view>
+            <loader id="recipientDepartmentsListsDl">
+                <query><![CDATA[
+            SELECT e FROM qrcode$RecipientDepartmentList e
+            LEFT JOIN e.share s
+            WHERE e.accessType='A' OR e.owner.id=:id OR s.id=:id
+        ]]></query>
             </loader>
+            <collection id="departmentsInListDc" property="recipients"/>
         </collection>
     </data>
 
@@ -118,9 +132,63 @@
                     </tab>
 
                     <tab id="companiesTab" caption="Юр лица">
+                        <split id="companiesListSplit" orientation="horizontal" locked="true">
+
+                            <vbox id="companiesViewList" height="100%" width="100%" expand="companiesListTable">
+                                <label id="companiesLabelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="companiesListTable"
+                                       dataContainer="recipientCompaniesListsDc"
+                                       width="100%" height="100%">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                            <vbox id="companiesViewDetailList" height="100%" width="100%" expand="companiesListsDetailTable">
+                                <label id="companiesLabelDetailList" value="Юр лица в списке:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="companiesListsDetailTable"
+                                       dataContainer="companiesInListDc"
+                                       width="100%" height="100%" editable="false">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                        </split>
                     </tab>
 
                     <tab id="departmentsTab" caption="Подразделения">
+                        <split id="departmentsListSplit" orientation="horizontal" locked="true">
+
+                            <vbox id="departmentsViewList" height="100%" width="100%" expand="departmentsListTable">
+                                <label id="departmentsLabelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="departmentsListTable"
+                                       dataContainer="recipientDepartmentsListsDc"
+                                       width="100%" height="100%">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                            <vbox id="departmentsViewDetailList" height="100%" width="100%" expand="departmentsListsDetailTable">
+                                <label id="departmentsLabelDetailList" value="Подразделения в списке:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="departmentsListsDetailTable"
+                                       dataContainer="departmentsInListDc"
+                                       width="100%" height="100%" editable="false">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                        </split>
                     </tab>
                 </tabSheet>
             </groupBox>

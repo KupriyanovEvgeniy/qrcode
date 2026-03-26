@@ -1,0 +1,1 @@
+alter table qrcode_recipient_list_departament_link rename to QRCODE_RECIPIENT_LIST_DEPARTAMENT_LINK__U37551 ;

@@ -1,0 +1,5 @@
+create table QRCODE_RECIPIENT_LIST_COMPANY_LINK (
+    RECIPIENT_LIST_ID uuid,
+    COMPANY_ID uuid,
+    primary key (RECIPIENT_LIST_ID, COMPANY_ID)
+);

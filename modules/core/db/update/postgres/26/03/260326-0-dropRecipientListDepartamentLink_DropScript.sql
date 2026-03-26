@@ -1,0 +1,1 @@
+drop table if exists QRCODE_RECIPIENT_LIST_DEPARTAMENT_LINK__U37551 cascade ;

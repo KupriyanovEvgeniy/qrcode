@@ -211,3 +211,69 @@ create table QRCODE_RECIPIENT_LIST_INDIVIDUAL_SHARE_LINK (
     primary key (RECIPIENT_LIST_ID, USER_ID)
 )^
 -- end QRCODE_RECIPIENT_LIST_INDIVIDUAL_SHARE_LINK
+-- begin QRCODE_RECIPIENT_COMPANY_LIST
+create table QRCODE_RECIPIENT_COMPANY_LIST (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255),
+    OWNER_ID uuid not null,
+    ACCESS_TYPE varchar(50),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_RECIPIENT_COMPANY_LIST
+
+-- begin QRCODE_RECIPIENT_LIST_COMPANY_SHARE_LINK
+create table QRCODE_RECIPIENT_LIST_COMPANY_SHARE_LINK (
+    RECIPIENT_LIST_ID uuid,
+    USER_ID uuid,
+    primary key (RECIPIENT_LIST_ID, USER_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_COMPANY_SHARE_LINK
+
+-- begin QRCODE_RECIPIENT_LIST_COMPANY_LINK
+create table QRCODE_RECIPIENT_LIST_COMPANY_LINK (
+    RECIPIENT_LIST_ID uuid,
+    COMPANY_ID uuid,
+    primary key (RECIPIENT_LIST_ID, COMPANY_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_COMPANY_LINK
+-- begin QRCODE_RECIPIENT_DEPARTMENT_LIST
+create table QRCODE_RECIPIENT_DEPARTMENT_LIST (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255),
+    OWNER_ID uuid not null,
+    ACCESS_TYPE varchar(50),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_RECIPIENT_DEPARTMENT_LIST
+-- begin QRCODE_RECIPIENT_LIST_DEPARTMENT_LINK
+create table QRCODE_RECIPIENT_LIST_DEPARTMENT_LINK (
+    RECIPIENT_LIST_ID uuid,
+    DEPARTMENT_ID uuid,
+    primary key (RECIPIENT_LIST_ID, DEPARTMENT_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_DEPARTMENT_LINK
+-- begin QRCODE_RECIPIENT_LIST_DEPARTMENT_SHARE_LINK
+create table QRCODE_RECIPIENT_LIST_DEPARTMENT_SHARE_LINK (
+    RECIPIENT_LIST_ID uuid,
+    USER_ID uuid,
+    primary key (RECIPIENT_LIST_ID, USER_ID)
+)^
+-- end QRCODE_RECIPIENT_LIST_DEPARTMENT_SHARE_LINK

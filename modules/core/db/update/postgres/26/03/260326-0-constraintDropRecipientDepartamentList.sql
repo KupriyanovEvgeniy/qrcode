@@ -1,0 +1,2 @@
+alter table qrcode_recipient_list_departament_link drop constraint FK_RECLISDEP_ON_RECIPIENT_DEPARTAMENT_LIST ;
+alter table qrcode_recipient_list_departament_share_link drop constraint FK_RECLISDEPSHA_ON_RECIPIENT_DEPARTAMENT_LIST ;
