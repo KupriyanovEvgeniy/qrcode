@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.util.Map;
 
-@JavaScript({"vaadin://tribute/tribute.js", "vaadin://tribute/tribute-connector.js"})
-@StyleSheet({"vaadin://tribute/tribute.css"})
+//@JavaScript({"vaadin://tribute/tribute.js", "vaadin://tribute/tribute-connector.js"})
+//@StyleSheet({"vaadin://tribute/tribute.css"})
 public class AutocompleteExtension extends AbstractJavaScriptExtension {
     public AutocompleteExtension(AbstractComponent target, List<TextTemplate> templates){
         super(target);

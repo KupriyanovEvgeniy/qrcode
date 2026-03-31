@@ -4,12 +4,14 @@
         messagesPack="com.company.qrcode.web.ui">
     <actions>
         <action id="openTemplateLists" shortcut="F1"/>
+        <action id="openSelectTemplateLists" shortcut="F2"/>
     </actions>
     <layout spacing="true">
         <textArea id="myTextArea"
                   caption="Описание"
                   width="100%"
                   resizable="false"
-                  height="200px"/>
+                  height="200px"
+                  trim="false"/>
     </layout>
 </window>
