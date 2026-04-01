@@ -16,7 +16,7 @@
             <view extends="_local"/>
             <loader id="templateCategoriesesDl">
                 <query>
-                    <![CDATA[select e from qrcode$TemplateCategories e]]>
+                    <![CDATA[select e from qrcode$TemplateCategories e WHERE e.owner.id=:id OR e.accessType='A']]>
                 </query>
             </loader>
         </collection>
@@ -25,11 +25,6 @@
                 width="800"/>
     <layout expand="templateCategoriesesTable"
             spacing="true">
-        <filter id="filter"
-                applyTo="templateCategoriesesTable"
-                dataLoader="templateCategoriesesDl">
-            <properties include=".*"/>
-        </filter>
         <groupTable id="templateCategoriesesTable"
                     width="100%"
                     dataContainer="templateCategoriesesDc">

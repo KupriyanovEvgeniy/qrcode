@@ -293,6 +293,8 @@ configure(webModule) {
         compile(guiModule)
 
         compile 'com.google.zxing:javase:3.5.3'
+        compile("com.haulmont.thesis.app:thesis-web-themes:$thesisVersion")
+        themes("com.haulmont.thesis.app:thesis-web-themes:$thesisVersion")
     }
 
     task webArchive(type: Zip) {
@@ -329,6 +331,21 @@ configure(webModule) {
     task deploy(dependsOn: [assemble, cleanConf], type: ThesisWebAppDeployment) {
         appName = "${modulePrefix}"
         appJars("${modulePrefix}-global", "${modulePrefix}-gui", "${modulePrefix}-web")
+    }
+
+//    task buildScssThemes(type: CubaWebScssThemeCreation)
+//
+//    task deployThemes(type: CubaDeployThemeTask, dependsOn: buildScssThemes)
+//
+//    assemble.dependsOn buildScssThemes
+
+    task themesJar(type: Jar) {
+        from file('themes')
+        classifier = 'themes'
+    }
+
+    artifacts {
+        archives themesJar
     }
 }
 

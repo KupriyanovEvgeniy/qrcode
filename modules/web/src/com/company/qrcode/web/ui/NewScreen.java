@@ -22,18 +22,12 @@ public class NewScreen extends Screen {
     private ConstructionService constructionService;
     @Inject
     private TextArea<String> myTextArea;
-
-    @Subscribe
-    public void onAfterShow(AfterShowEvent event) {
-        List<TextTemplate> templates = constructionService.getActiveConstructions();
-    }
     @Inject
     private Screens screens;
     @Subscribe("openTemplateLists")
     public void onOpenTemplateLists(Action.ActionPerformedEvent event){
         TextTemplateBrowse screenTemplates = screens.create(TextTemplateBrowse.class, OpenMode.DIALOG);
         screenTemplates.addAfterCloseListener(afterCloseEvent -> {
-            List<TextTemplate> templates = constructionService.getActiveConstructions();
             TextTemplate myTemplate = screenTemplates.getTemplate();
             if(myTemplate!=null){
                 setText(myTemplate.getContent());

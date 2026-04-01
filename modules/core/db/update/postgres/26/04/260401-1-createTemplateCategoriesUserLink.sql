@@ -1,0 +1,5 @@
+create table QRCODE_TEMPLATE_CATEGORIES_USER_LINK (
+    TEMPLATE_CATEGORIES_ID uuid,
+    USER_ID uuid,
+    primary key (TEMPLATE_CATEGORIES_ID, USER_ID)
+);

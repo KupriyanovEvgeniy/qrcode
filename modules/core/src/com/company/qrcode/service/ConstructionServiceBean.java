@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,22 +22,26 @@ public class ConstructionServiceBean implements ConstructionService {
     private UserSettingService userSettingService;
     @Inject
     private DataManager dataManager;
-
     @Override
     @Cacheable(value = "constructions-cache")
     public List<TextTemplate> getActiveConstructions(){
-        /*List<UUID> ids = userSessionSource.getUserSession().getAttribute("selectedTemplates");*/
         ObjectMapper mapper = new ObjectMapper();
         List<UUID> ids;
         try{
-            ids = mapper.readValue(userSettingService.loadSetting("selectedTemplates"), new TypeReference<List<UUID>>(){});
+            String first = userSettingService.loadSetting("selectedTemplates");
+            if(first!=null){
+                ids = mapper.readValue(first, new TypeReference<List<UUID>>(){});
+            }
+            else{
+                ids = null;
+            }
         }
         catch (JsonProcessingException e){
             throw new RuntimeException("Ошибка чтения JSON с текстовыми шаблонами", e);
         }
         return dataManager
                 .load(TextTemplate.class)
-                .query("SELECT e FROM qrcode$TextTemplate e WHERE e.active=true AND e.id IN :selectedIds")
+                .query("SELECT e FROM qrcode$TextTemplate e WHERE e.category.active=true AND e.id IN :selectedIds")
                 .parameter("selectedIds",ids)
                 .view("textTemplate-view").list();
     }

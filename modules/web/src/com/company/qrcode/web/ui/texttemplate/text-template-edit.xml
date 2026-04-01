@@ -7,11 +7,9 @@
         <instance id="textTemplateDc" class="com.company.qrcode.entity.TextTemplate">
             <view extends="_local">
                 <property name="owner" view="_minimal"/>
-                <property name="share" view="_minimal"/>
                 <property name="category" view="_minimal"/>
             </view>
             <loader/>
-            <collection id="shareDc" property="share"/>
         </instance>
         <collection id="categoriesDc" class="com.company.qrcode.entity.TemplateCategories" view="_minimal">
             <loader id="categoriesDl">
@@ -24,31 +22,13 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="textTemplateDc">
+        <form id="form" dataContainer="textTemplateDc" captionPosition="TOP">
             <column width="350px">
-                <textField id="codeField" property="code"/>
-                <textArea id="contentField" property="content" rows="5"/>
-                <lookupPickerField id="categoryPickerField" dataContainer="textTemplateDc" property="category" optionsContainer="categoriesDc"/>
-                <checkBox id="activeField" property="active"/>
-                <lookupField id="accessTypeField" property="accessType"/>
+                <textField id="codeField" property="code" caption="Название"/>
+                <textArea id="contentField" property="content" rows="5" caption="Содержимое"/>
+                <lookupPickerField id="categoryPickerField" dataContainer="textTemplateDc" property="category" optionsContainer="categoriesDc" caption="Группа"/>
             </column>
         </form>
-        <groupBox id="shareBox" caption="msg://com.company.qrcode.entity/RecipientList.share" visible="false">
-            <table id="shareTable" dataContainer="shareDc" width="100%" height="200px">
-                <actions>
-                    <action id="add" type="add"/>
-                    <action id="exclude" type="exclude"/>
-                </actions>
-                <columns>
-                    <column id="login"/>
-                    <column id="name"/>
-                </columns>
-                <buttonsPanel>
-                    <button action="shareTable.add"/>
-                    <button action="shareTable.exclude"/>
-                </buttonsPanel>
-            </table>
-        </groupBox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>

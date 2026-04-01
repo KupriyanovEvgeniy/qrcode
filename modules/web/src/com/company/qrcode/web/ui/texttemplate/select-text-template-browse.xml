@@ -10,7 +10,10 @@
     <dialogMode height="600"
                 width="800"/>
     <layout>
-        <groupTable id="selectedTemplates" dataContainer="selectedTextTemplatesDc" width="100%" height="100%">
+        <groupTable id="selectedTemplates" dataContainer="selectedTextTemplatesDc" width="100%" height="100%" multiselect="true">
+            <buttonsPanel id="tableButtons">
+                <button id="createNewTemplateList" caption="создать"/>
+            </buttonsPanel>
             <columns>
                 <column id="code"/>
                 <column id="content"/>

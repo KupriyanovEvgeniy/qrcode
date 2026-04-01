@@ -12,21 +12,41 @@
     <data>
         <instance id="templateCategoriesDc"
                   class="com.company.qrcode.entity.TemplateCategories">
-            <view extends="_local"/>
+            <view extends="_local">
+                <property name="share" view="_minimal"/>
+            </view>
             <loader/>
+            <collection id="shareDc" property="share"/>
         </instance>
     </data>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="templateCategoriesDc">
-            <column width="350px">
-                <textField id="nameField" property="name"/>
+        <form id="form" dataContainer="templateCategoriesDc" captionPosition="TOP" align="MIDDLE_CENTER">
+            <column>
+                <textField id="nameField" property="name" caption="Название"/>
+                <lookupField id="accessTypeField" property="accessType" caption="Тип доступа"/>
             </column>
         </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+        <groupBox id="shareBox" caption="msg://com.company.qrcode.entity/RecipientList.share" visible="false">
+            <table id="shareTable" dataContainer="shareDc" width="100%" height="200px">
+                <actions>
+                    <action id="add" type="add"/>
+                    <action id="exclude" type="exclude"/>
+                </actions>
+                <columns>
+                    <column id="login"/>
+                    <column id="name"/>
+                </columns>
+                <buttonsPanel align="MIDDLE_CENTER">
+                    <button action="shareTable.add"/>
+                    <button action="shareTable.exclude"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
+        <hbox id="editActions" spacing="true" align="MIDDLE_CENTER">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose" align="MIDDLE_CENTER"/>
+            <button id="closeBtn" action="windowClose" align="MIDDLE_CENTER"/>
         </hbox>
     </layout>
 </window>

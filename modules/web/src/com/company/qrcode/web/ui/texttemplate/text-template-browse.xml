@@ -13,7 +13,7 @@
             </view>
             <loader id="textTemplatesDl">
                 <query>
-                    <![CDATA[SELECT e FROM qrcode$TextTemplate e LEFT JOIN e.share s where e.accessType='A' or e.owner.id=:id or s.id=:id]]>
+                    <![CDATA[SELECT e FROM qrcode$TextTemplate e LEFT JOIN e.category.share u WHERE e.owner.id=:id OR e.category.accessType='A' OR u.id=:id]]>
                 </query>
             </loader>
         </collection>

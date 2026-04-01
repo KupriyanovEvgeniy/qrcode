@@ -36,17 +36,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TextTemplateBrowse extends StandardLookup<TextTemplate> {
     private TextTemplate selectedTemplate;
     @Inject
-    private CollectionLoader<TextTemplate> textTemplatesDl;
-    @Inject
     private GroupTable<TextTemplate> textTemplatesTable;
-    @Inject
-    private UserSession userSession;
     @Inject
     private Notifications notifications;
     @Inject
-    private UserSessionSource userSessionSource;
-    @Inject
     private UserSettingService userSettingService;
+    @Inject
+    private CollectionLoader<TextTemplate> textTemplatesDl;
+    @Inject
+    private UserSession userSession;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -61,10 +59,10 @@ public class TextTemplateBrowse extends StandardLookup<TextTemplate> {
             }
         });
     }
-    
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         textTemplatesDl.setParameter("id", userSession.getUser().getUuid());
+        textTemplatesDl.load();
     }
     @Subscribe("selectCategory")
     public void onSelectCategoryClick(Button.ClickEvent event) {

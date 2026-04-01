@@ -52,6 +52,9 @@ create table QRCODE_TEMPLATE_CATEGORIES (
     DELETED_BY varchar(50),
     --
     NAME varchar(30),
+    ACTIVE boolean,
+    ACCESS_TYPE varchar(50),
+    OWNER_ID uuid not null,
     --
     primary key (ID)
 )^
@@ -187,10 +190,8 @@ create table QRCODE_TEXT_TEMPLATE (
     --
     CODE varchar(20),
     CONTENT text,
-    CATEGORY_ID uuid,
-    ACTIVE boolean,
-    ACCESS_TYPE varchar(50),
     OWNER_ID uuid not null,
+    CATEGORY_ID uuid,
     --
     primary key (ID)
 )^
@@ -202,13 +203,13 @@ create table QRCODE_REQUEST_USER_LINK (
     primary key (REQUEST_ID, USER_ID)
 )^
 -- end QRCODE_REQUEST_USER_LINK
--- begin QRCODE_TEXT_TEMPLATE_USER_LINK
-create table QRCODE_TEXT_TEMPLATE_USER_LINK (
-    TEXT_TEMPLATE_ID uuid,
+-- begin QRCODE_TEMPLATE_CATEGORIES_USER_LINK
+create table QRCODE_TEMPLATE_CATEGORIES_USER_LINK (
+    TEMPLATE_CATEGORIES_ID uuid,
     USER_ID uuid,
-    primary key (TEXT_TEMPLATE_ID, USER_ID)
+    primary key (TEMPLATE_CATEGORIES_ID, USER_ID)
 )^
--- end QRCODE_TEXT_TEMPLATE_USER_LINK
+-- end QRCODE_TEMPLATE_CATEGORIES_USER_LINK
 -- begin QRCODE_RECIPIENT_LIST_USER_LINK
 create table QRCODE_RECIPIENT_LIST_USER_LINK (
     RECIPIENT_LIST_ID uuid,
