@@ -22,5 +22,7 @@
         <class>com.company.qrcode.entity.RecipientIndividualList</class>
         <class>com.company.qrcode.entity.RecipientCompanyList</class>
         <class>com.company.qrcode.entity.RecipientDepartmentList</class>
+        <class>com.company.qrcode.entity.RecipientUniversalList</class>
+        <class>com.company.qrcode.entity.RecipientUniversalItem</class>
     </persistence-unit>
 </persistence>

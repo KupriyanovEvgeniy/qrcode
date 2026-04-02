@@ -18,5 +18,11 @@
         <item screen="qrcode$RecipientIndividualList.browse"
               caption="mainMsg://menu_config.qrcode$RecipientIndividualList.browse"/>
         <item screen="qrcode_SingleEntitySelect" caption="mainMsg://menu_config.qrcode_SingleEntitySelect"/>
+        <item screen="qrcode$RecipientUniversalList.browse"
+              caption="mainMsg://menu_config.qrcode$RecipientUniversalList.browse"/>
+        <item screen="qrcode$RecipientCompanyList.browse"
+              caption="mainMsg://menu_config.qrcode$RecipientCompanyList.browse"/>
+        <item screen="qrcode$RecipientDepartmentList.browse"
+              caption="mainMsg://menu_config.qrcode$RecipientDepartmentList.browse"/>
     </menu>
 </menu-config>

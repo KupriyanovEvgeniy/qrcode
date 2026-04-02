@@ -65,11 +65,30 @@
             </loader>
             <collection id="departmentsInListDc" property="recipients"/>
         </collection>
+
+        <collection id="recipientUniversalListsDc"
+                    class="com.company.qrcode.entity.RecipientUniversalList">
+            <view extends="_local">
+                <property name="recipients" view="_local"/>
+                <property name="share"/>
+            </view>
+            <loader id="recipientUniversalListsDl">
+                <query><![CDATA[
+            SELECT e FROM qrcode$RecipientUniversalList e
+            LEFT JOIN e.share s
+            WHERE e.accessType='A' OR e.owner.id=:id OR s.id=:id
+        ]]></query>
+            </loader>
+
+            <collection id="universalItemsDc" property="recipients"/>
+        </collection>
+
     </data>
 
     <layout spacing="true">
         <vbox id="mainBox" height="100%" spacing="true">
             <button id="addOneBtn" caption="+"/>
+            <button id="createListBtn" caption="Создать список"/>
             <groupBox id="choiseUsersBox" caption="Выбранные пользователи" height="100%">
                 <table id="selectedTable"
                        dataContainer="selectedItemsDc"
@@ -85,7 +104,7 @@
                 <button id="addList" icon="font-icon:ARROW_UP" align="MIDDLE_CENTER"/>
                 <button id="removeList" icon="font-icon:ARROW_DOWN" align="MIDDLE_CENTER"/>
             </buttonsPanel>
-            <groupBox id="choiseListsBox" height="100%">
+            <groupBox id="choiseListsBox" height="100%" width="100%">
                 <tabSheet id="entityTabs" width="100%" height="100%">
                     <tab id="usersTab" caption="Сотрудники">
                         <split id="usersListsSplit" orientation="horizontal" locked="true">
@@ -191,12 +210,42 @@
 
                         </split>
                     </tab>
+
+                    <tab id="universalTab" caption="Пользовательские списки">
+                        <split id="universalSplit" orientation="horizontal" locked="true">
+
+                            <vbox id="universalViewList" height="100%" width="100%" expand="universalListsTable">
+                                <label id="universalLabelList" value="Списки:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="universalListsTable"
+                                       dataContainer="recipientUniversalListsDc"
+                                       width="100%" height="100%">
+                                    <columns>
+                                        <column id="id"/>
+                                        <column id="name"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                            <vbox id="universalViewDetailList" height="100%" width="100%" expand="universalItemsTable">
+                                <label id="universalLabelDetailList" value="Элементы списка:" align="MIDDLE_CENTER" stylename="h4"/>
+                                <table id="universalItemsTable"
+                                       dataContainer="universalItemsDc"
+                                       width="100%" height="100%">
+                                    <columns>
+                                        <column id="entityName"/>
+                                        <column id="entityType"/>
+                                    </columns>
+                                </table>
+                            </vbox>
+
+                        </split>
+                    </tab>
                 </tabSheet>
             </groupBox>
+            <hbox id="lookupActions" spacing="true">
+                <button id="selectBtn" caption="Выбрать"/>
+                <button id="cancelBtn" caption="Отмена"/>
+            </hbox>
         </vbox>
-        <hbox id="lookupActions" spacing="true">
-            <button id="selectBtn" caption="Выбрать"/>
-            <button id="cancelBtn" caption="Отмена"/>
-        </hbox>
     </layout>
 </window>

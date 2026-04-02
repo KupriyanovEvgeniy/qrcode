@@ -26,5 +26,11 @@
         <entity class="com.company.qrcode.entity.RecipientDepartmentList">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.qrcode.entity.RecipientUniversalList">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.qrcode.entity.RecipientUniversalItem">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://recipientUniversalListEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.qrcode.web.ui.recipientuniversallist">
+    <data>
+        <instance id="recipientUniversalListDc"
+                  class="com.company.qrcode.entity.RecipientUniversalList">
+            <view extends="_local">
+                <property name="owner" view="_minimal"/>
+                <property name="recipients" view="_local"/>
+                <property name="share" view="_minimal"/>
+            </view>
+            <loader/>
+            <collection id="shareDc" property="share"/>
+            <collection id="recipientsDc" property="recipients"/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="recipientUniversalListDc">
+            <column width="350px">
+                <textField id="nameField" property="name"/>
+                <lookupField id="accessTypeField" property="accessType"/>
+            </column>
+        </form>
+        <groupBox id="recipientsBox" caption="msg://com.company.qrcode.entity/RecipientUniversalList.recipients">
+            <hbox spacing="true" id="btnHbox">
+                <button id="addBtn" caption="Добавить"/>
+                <button id="removeBtn" caption="Удалить"/>
+            </hbox>
+            <table id="recipientsTable" dataContainer="recipientsDc" width="100%" height="200px">
+                <columns>
+                    <column id="entityName"/>
+                    <column id="entityType"/>
+                </columns>
+            </table>
+        </groupBox>
+        <groupBox id="shareBox" caption="msg://com.company.qrcode.entity/RecipientUserList.share" visible="false">
+            <table id="shareTable" dataContainer="shareDc" width="100%" height="200px">
+                <actions>
+                    <action id="add" type="add"/>
+                    <action id="exclude" type="exclude"/>
+                </actions>
+                <columns>
+                    <column id="login"/>
+                    <column id="name"/>
+                </columns>
+                <buttonsPanel>
+                    <button action="shareTable.add"/>
+                    <button action="shareTable.exclude"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

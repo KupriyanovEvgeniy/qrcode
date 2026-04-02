@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2026 LTD Haulmont Samara. All Rights Reserved.
+  ~ Haulmont Samara proprietary and confidential.
+  ~ Use is subject to license terms.
+  -->
+
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://recipientDepartmentListBrowse.caption"
+        focusComponent="recipientDepartmentListsTable"
+        messagesPack="com.company.qrcode.web.ui.recipientdepartmentlist">
+    <data readOnly="true">
+        <collection id="recipientDepartmentListsDc"
+                    class="com.company.qrcode.entity.RecipientDepartmentList">
+            <view extends="_local"/>
+            <loader id="recipientDepartmentListsDl">
+                <query>
+                    <![CDATA[select e from qrcode$RecipientDepartmentList e
+WHERE e.accessType = 'A'
+   OR e.owner.id = :id
+   OR EXISTS (
+        SELECT u FROM e.share u WHERE u.id = :id
+   )]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="recipientDepartmentListsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="recipientDepartmentListsTable"
+                dataLoader="recipientDepartmentListsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="recipientDepartmentListsTable"
+                    width="100%"
+                    dataContainer="recipientDepartmentListsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="name"/>
+                <column id="accessType"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="recipientDepartmentListsTable.create"/>
+                <button id="editBtn" action="recipientDepartmentListsTable.edit"/>
+                <button id="removeBtn" action="recipientDepartmentListsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

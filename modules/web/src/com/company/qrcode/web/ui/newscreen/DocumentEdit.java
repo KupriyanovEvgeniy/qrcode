@@ -11,10 +11,9 @@ import com.company.qrcode.web.ui.correspond.ToChoiseCorrespondent;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.components.Action;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.PickerField;
-import com.haulmont.cuba.gui.components.TokenList;
+import com.haulmont.cuba.gui.model.KeyValueCollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.security.entity.User;
@@ -28,15 +27,16 @@ import java.util.Collection;
 public class DocumentEdit extends Screen {
 
     @Inject
+    private KeyValueCollectionContainer addresseesDc;
+
+    @Inject
+    private Table<KeyValueEntity> addresseesTable;
+
+    @Inject
     private ScreenBuilders screenBuilders;
 
-    @Inject
-    private Screens screens;
-    @Inject
-    private TokenList addresseeField;
-
-    @Subscribe("selectBtn")
-    public void onSelectBtnClick(Button.ClickEvent event) {
+    @Subscribe("addBtn")
+    public void onAddBtnClick(Button.ClickEvent event) {
 
         screenBuilders.screen(this)
                 .withScreenClass(ToChoiseCorrespondent.class)
@@ -53,11 +53,41 @@ public class DocumentEdit extends Screen {
                         Collection<Entity> selected = screen.getSelectedEntities();
 
                         if (selected != null) {
-                            addresseeField.setValue(selected);
+                            for (Entity entity : selected) {
+                                addToTable(entity);
+                            }
                         }
                     }
                 });
     }
-    
-    
+
+    private void addToTable(Entity entity) {
+
+        if (alreadyExists(entity))
+            return;
+
+        KeyValueEntity row = new KeyValueEntity();
+
+        row.setValue("entity", entity);
+        row.setValue("name", entity.getInstanceName());
+        row.setValue("type", entity.getMetaClass().getName());
+
+        addresseesDc.getMutableItems().add(row);
+    }
+
+    @Subscribe("removeBtn")
+    public void onRemoveBtnClick(Button.ClickEvent event) {
+
+        if (!addresseesTable.getSelected().isEmpty()) {
+            addresseesDc.getMutableItems()
+                    .removeAll(addresseesTable.getSelected());
+        }
+    }
+
+    private boolean alreadyExists(Entity entity) {
+        return addresseesDc.getItems().stream()
+                .anyMatch(e -> entity.equals(e.getValue("entity")));
+    }
+
+
 }

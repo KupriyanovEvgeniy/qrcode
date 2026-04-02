@@ -9,4 +9,6 @@
     <entity metaClass="qrcode$RecipientIndividualList"/>
     <entity metaClass="qrcode$RecipientCompanyList"/>
     <entity metaClass="qrcode$RecipientDepartamentList"/>
+    <entity metaClass="qrcode$RecipientUniversalList"/>
+    <entity metaClass="qrcode$RecipientUniversalItem"/>
 </entities>

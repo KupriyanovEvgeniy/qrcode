@@ -6,10 +6,13 @@
 
 package com.company.qrcode.web.ui.correspond;
 
-import com.company.qrcode.entity.RecipientIndividualList;
-import com.company.qrcode.entity.RecipientUserList;
+import com.company.qrcode.entity.*;
 import com.company.qrcode.web.ui.singleentityselect.SingleEntitySelect;
+import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.entity.contracts.Id;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
@@ -35,6 +38,8 @@ import java.util.Set;
 @LookupComponent("selectedTable")
 public class ToChoiseCorrespondent extends StandardLookup<User> {
     @Inject
+    private CollectionLoader<RecipientUniversalList> recipientUniversalListsDl;
+    @Inject
     private GroupBoxLayout choiseListsBox;
     @Inject
     private GroupBoxLayout choiseUsersBox;
@@ -58,6 +63,16 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     private TabSheet entityTabs;
     @Inject
     ScreenBuilders screenBuilders = new ScreenBuilders();
+    @Inject
+    private Table<RecipientUniversalList> universalListsTable;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private CollectionLoader<RecipientDepartmentList> recipientDepartmentsListsDl;
+    @Inject
+    private CollectionLoader<RecipientCompanyList> recipientCompaniesListsDl;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -70,6 +85,12 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
         recipientUserListsDl.load();
         recipientsIndividualListsDl.setParameter("id", userSession.getUser().getId());
         recipientsIndividualListsDl.load();
+        recipientUniversalListsDl.setParameter("id", userSession.getUser().getId());
+        recipientUniversalListsDl.load();
+        recipientCompaniesListsDl.setParameter("id", userSession.getUser().getId());
+        recipientCompaniesListsDl.load();
+        recipientDepartmentsListsDl.setParameter("id", userSession.getUser().getId());
+        recipientDepartmentsListsDl.load();
     }
     @Subscribe("addList")
     public void onAddListClick(Button.ClickEvent event) {
@@ -92,6 +113,10 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
 
             case "departmentsTab":
                 addDepartments();
+                break;
+
+            case "universalTab":
+                addUniversal();
                 break;
 
             default:
@@ -166,6 +191,43 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
         }
 
         addEntities(selected, "Юр лицо");
+    }
+
+    private void addUniversal() {
+
+        RecipientUniversalList list = universalListsTable.getSingleSelected();
+
+        if (list == null) {
+            showSelectError();
+            return;
+        }
+
+        for (RecipientUniversalItem item : list.getRecipients()) {
+
+            if (item.getEntityId() == null)
+                continue;
+
+            Entity entity = loadEntity(item);
+
+            if (entity != null) {
+                addToSelected(entity, item.getEntityType());
+            }
+        }
+    }
+
+    private Entity loadEntity(RecipientUniversalItem item) {
+
+        MetaClass metaClass = metadata.getSession().getClass(item.getEntityType());
+
+        if (metaClass == null) {
+            return null;
+        }
+
+        Class<?> javaClass = metaClass.getJavaClass();
+
+        return (Entity) dataManager.load(
+                Id.of(item.getEntityId(), (Class) javaClass)
+        ).optional().orElse(null);
     }
 
     private void showSelectError() {
@@ -254,5 +316,73 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
         });
 
         screen.show();
+    }
+
+    @Subscribe("createListBtn")
+    public void onCreateListBtnClick(Button.ClickEvent event) {
+
+        String tabId = entityTabs.getSelectedTab().getName();
+
+        Screen screen = null;
+
+        switch (tabId) {
+
+            case "usersTab":
+                screen = screenBuilders.editor(RecipientUserList.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "individualsTab":
+                screen = screenBuilders.editor(RecipientIndividualList.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "companiesTab":
+                screen = screenBuilders.editor(RecipientCompanyList.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "departmentsTab":
+                screen = screenBuilders.editor(RecipientDepartmentList.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "universalTab":
+                screen = screenBuilders.editor(RecipientUniversalList.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            default:
+                notifications.create()
+                        .withCaption("Неизвестный тип списка")
+                        .show();
+                return;
+        }
+
+        screen.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.COMMIT)) {
+                reloadLists();
+            }
+        });
+
+        screen.show();
+    }
+
+    private void reloadLists() {
+        recipientUserListsDl.load();
+        recipientsIndividualListsDl.load();
+        recipientUniversalListsDl.load();
+        recipientCompaniesListsDl.load();
+        recipientDepartmentsListsDl.load();
     }
 }

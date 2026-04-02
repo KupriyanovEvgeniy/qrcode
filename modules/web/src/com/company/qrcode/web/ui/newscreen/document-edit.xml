@@ -8,14 +8,33 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://documentEdit.caption"
         messagesPack="com.company.qrcode.web.ui.newscreen">
+    <data>
+        <keyValueCollection id="addresseesDc">
+            <properties>
+                <property name="entity"/>
+                <property name="name"/>
+                <property name="type"/>
+            </properties>
+        </keyValueCollection>
+    </data>
     <layout>
-        <tokenList id="addresseeField"
-                   caption="Адресаты"
-                   width="100%">
-            <lookup/>
-        </tokenList>
+        <groupBox id="adressTableGroupBox" caption="Адресаты" width="100%" height="300px">
+            <table id="addresseesTable"
+                   dataContainer="addresseesDc"
+                   width="100%" height="100%"
+                   multiselect="true">
 
-        <button id="selectBtn" caption="Выбрать"/>
+                <columns>
+                    <column id="name"/>
+                    <column id="type"/>
+                </columns>
+
+                <buttonsPanel id="adressBtnPanel">
+                    <button id="addBtn" caption="Добавить"/>
+                    <button id="removeBtn" caption="Удалить"/>
+                </buttonsPanel>
+            </table>
+        </groupBox>
 
     </layout>
 </window>

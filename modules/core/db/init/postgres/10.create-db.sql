@@ -277,3 +277,47 @@ create table QRCODE_RECIPIENT_LIST_DEPARTMENT_SHARE_LINK (
     primary key (RECIPIENT_LIST_ID, USER_ID)
 )^
 -- end QRCODE_RECIPIENT_LIST_DEPARTMENT_SHARE_LINK
+-- begin QRCODE_RECIPIENT_UNIVERSAL_LIST
+create table QRCODE_RECIPIENT_UNIVERSAL_LIST (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    NAME varchar(255),
+    OWNER_ID uuid not null,
+    ACCESS_TYPE varchar(50),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_RECIPIENT_UNIVERSAL_LIST
+-- begin QRCODE_RECIPIENT_UNIVERSAL_ITEM
+create table QRCODE_RECIPIENT_UNIVERSAL_ITEM (
+    ID uuid,
+    VERSION integer,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    LIST_ID uuid,
+    ENTITY_ID uuid,
+    ENTITY_NAME varchar(255),
+    ENTITY_TYPE varchar(255),
+    --
+    primary key (ID)
+)^
+-- end QRCODE_RECIPIENT_UNIVERSAL_ITEM
+-- begin QRCODE_RECIPIENT_UNIVERSAL_LIST_USER_LINK
+create table QRCODE_RECIPIENT_UNIVERSAL_LIST_USER_LINK (
+    RECIPIENT_UNIVERSAL_LIST_ID uuid,
+    USER_ID uuid,
+    primary key (RECIPIENT_UNIVERSAL_LIST_ID, USER_ID)
+)^
+-- end QRCODE_RECIPIENT_UNIVERSAL_LIST_USER_LINK
