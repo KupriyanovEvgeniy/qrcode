@@ -18,20 +18,20 @@
         </keyValueCollection>
     </data>
     <layout>
-        <groupBox id="adressTableGroupBox" caption="Адресаты" width="100%" height="300px">
+        <groupBox id="adressTableGroupBox" caption="msg://addresseesTable.caption" width="100%" height="100%">
             <table id="addresseesTable"
                    dataContainer="addresseesDc"
                    width="100%" height="100%"
                    multiselect="true">
 
                 <columns>
-                    <column id="name"/>
-                    <column id="type"/>
+                    <column id="type" caption="msg://addresseesTable.type"/>
+                    <column id="name" caption="msg://addresseesTable.name"/>
                 </columns>
 
                 <buttonsPanel id="adressBtnPanel">
-                    <button id="addBtn" caption="Добавить"/>
-                    <button id="removeBtn" caption="Удалить"/>
+                    <button id="addBtn" caption="msg://addBtn"/>
+                    <button id="removeBtn" caption="msg://removeBtn"/>
                 </buttonsPanel>
             </table>
         </groupBox>

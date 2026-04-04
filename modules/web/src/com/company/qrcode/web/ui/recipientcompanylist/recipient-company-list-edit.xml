@@ -22,11 +22,10 @@
             <collection id="shareDc" property="share"/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
+    <dialogMode width="1000px" height="AUTO"/>
     <layout expand="editActions" spacing="true">
         <form id="form" dataContainer="recipientCompanyListDc">
-            <column width="350px">
+            <column childrenCaptionWidth="100px">
                 <textField id="nameField" property="name"/>
                 <lookupField id="accessTypeField" property="accessType"/>
             </column>

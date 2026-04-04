@@ -47,9 +47,9 @@
                 <action id="excel" type="excel"/>
             </actions>
             <columns>
-                <column id="name"/>
-                <column id="owner"/>
-                <column id="accessType"/>
+                <column id="name" caption="msg://tableList.name"/>
+                <column id="owner" caption="msg://tableList.owner"/>
+                <column id="accessType" caption="msg://tableList.accessType"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

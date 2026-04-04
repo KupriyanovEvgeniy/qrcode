@@ -9,10 +9,14 @@ package com.company.qrcode.web.ui.newscreen;
 import com.company.qrcode.entity.support.UniquePerson;
 import com.company.qrcode.web.ui.correspond.ToChoiseCorrespondent;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.model.KeyValueCollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.core.entity.Entity;
@@ -34,31 +38,66 @@ public class DocumentEdit extends Screen {
 
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private Messages messages;
+    @Inject
+    private UiComponents uiComponents;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+
+        addresseesTable.addGeneratedColumn("type", entity -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+
+            String type = entity.getValue("type");
+
+            switch (type) {
+                case "Сотрудник":
+                    label.setIcon("font-icon:USER");
+                    break;
+                case "Физ лицо":
+                    label.setIcon("font-icon:USER_O");
+                    break;
+                case "Юр лицо":
+                    label.setIcon("font-icon:BUILDING");
+                    break;
+                case "Подразделение":
+                    label.setIcon("font-icon:SITEMAP");
+                    break;
+                default:
+                    label.setIcon("font-icon:QUESTION");
+            }
+
+            label.setValue(type);
+            return label;
+        });
+    }
 
     @Subscribe("addBtn")
     public void onAddBtnClick(Button.ClickEvent event) {
 
-        screenBuilders.screen(this)
+        Screen screen = screenBuilders.screen(this)
                 .withScreenClass(ToChoiseCorrespondent.class)
                 .withLaunchMode(OpenMode.NEW_TAB)
-                .build()
-                .show()
-                .addAfterCloseListener(closeEvent -> {
+                .build();
 
-                    if (closeEvent.closedWith(StandardOutcome.SELECT)) {
+        screen.addAfterCloseListener(closeEvent -> {
 
-                        ToChoiseCorrespondent screen =
-                                (ToChoiseCorrespondent) closeEvent.getSource();
+            if (closeEvent.closedWith(StandardOutcome.SELECT)) {
 
-                        Collection<Entity> selected = screen.getSelectedEntities();
+                ToChoiseCorrespondent selectScreen = (ToChoiseCorrespondent) screen;
 
-                        if (selected != null) {
-                            for (Entity entity : selected) {
-                                addToTable(entity);
-                            }
-                        }
+                Collection<Entity> selected = selectScreen.getSelectedEntities();
+
+                if (selected != null) {
+                    for (Entity entity : selected) {
+                        addToTable(entity);
                     }
-                });
+                }
+            }
+        });
+
+        screen.show();
     }
 
     private void addToTable(Entity entity) {
@@ -70,7 +109,7 @@ public class DocumentEdit extends Screen {
 
         row.setValue("entity", entity);
         row.setValue("name", entity.getInstanceName());
-        row.setValue("type", entity.getMetaClass().getName());
+        row.setValue("type", getTypeName(entity));
 
         addresseesDc.getMutableItems().add(row);
     }
@@ -89,5 +128,25 @@ public class DocumentEdit extends Screen {
                 .anyMatch(e -> entity.equals(e.getValue("entity")));
     }
 
+    private String getTypeName(Entity entity) {
 
+        String metaName = entity.getMetaClass().getName();
+
+        switch (metaName) {
+            case "tm$User":
+                return messages.getMessage(getClass(), "type.user");
+
+            case "df$Individual":
+                return messages.getMessage(getClass(), "type.individual");
+
+            case "df$Company":
+                return messages.getMessage(getClass(), "type.company");
+
+            case "df$Department":
+                return messages.getMessage(getClass(), "type.department");
+
+            default:
+                return messages.getMessage(getClass(), "type.unknown");
+        }
+    }
 }

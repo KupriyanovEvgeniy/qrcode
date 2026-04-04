@@ -15,6 +15,7 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.KeyValueCollectionContainer;
@@ -26,12 +27,9 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.thesis.core.entity.Company;
 import com.haulmont.thesis.core.entity.Department;
 
-import java.util.Collection;
+import java.util.*;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @UiController("qrcode_ToChoiseCorrespondent")
 @UiDescriptor("to-choise-correspondent.xml")
@@ -73,11 +71,68 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     private CollectionLoader<RecipientDepartmentList> recipientDepartmentsListsDl;
     @Inject
     private CollectionLoader<RecipientCompanyList> recipientCompaniesListsDl;
+    @Inject
+    private Table<RecipientUniversalItem> universalItemsTable;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onInit(InitEvent event) {
         mainBox.setExpandRatio(choiseUsersBox, 1.0f);
         mainBox.setExpandRatio(choiseListsBox, 1.0f);
+
+        selectedTable.addGeneratedColumn("type", entity -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+
+            String type = entity.getValue("type");
+
+            switch (type) {
+                case "Сотрудник":
+                    label.setIcon("font-icon:USER");
+                    break;
+                case "Физ лицо":
+                    label.setIcon("font-icon:USER_O");
+                    break;
+                case "Юр лицо":
+                    label.setIcon("font-icon:BUILDING");
+                    break;
+                case "Подразделение":
+                    label.setIcon("font-icon:SITEMAP");
+                    break;
+                default:
+                    label.setIcon("font-icon:QUESTION");
+            }
+
+            label.setValue(type);
+            return label;
+        });
+
+        universalItemsTable.addGeneratedColumn("entityType", entity -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+
+            String metaType = entity.getEntityType();
+            String type = getTypeName(metaType);
+
+            switch (type) {
+                case "Сотрудник":
+                    label.setIcon("font-icon:USER");
+                    break;
+                case "Физ лицо":
+                    label.setIcon("font-icon:USER_O");
+                    break;
+                case "Юр лицо":
+                    label.setIcon("font-icon:BUILDING");
+                    break;
+                case "Подразделение":
+                    label.setIcon("font-icon:SITEMAP");
+                    break;
+                default:
+                    label.setIcon("font-icon:QUESTION");
+            }
+
+            label.setValue(type);
+            return label;
+        });
     }
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -166,31 +221,31 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
     }
 
     @Inject
-    private Table<Department> departmentsListTable;
+    private Table<RecipientDepartmentList> departmentsListTable;
 
     private void addDepartments() {
-        Set<Department> selected = departmentsListTable.getSelected();
+        RecipientDepartmentList list = departmentsListTable.getSingleSelected();
 
-        if (selected == null || selected.isEmpty()) {
+        if (list == null) {
             showSelectError();
             return;
         }
 
-        addEntities(selected, "Подразделение");
+        addEntities(list.getRecipients(), "Подразделение");
     }
 
     @Inject
-    private Table<Company> companiesListTable;
+    private Table<RecipientCompanyList> companiesListTable;
 
     private void addCompanies() {
-        Set<Company> selected = companiesListTable.getSelected();
+        RecipientCompanyList list = companiesListTable.getSingleSelected();
 
-        if (selected == null || selected.isEmpty()) {
+        if (list == null) {
             showSelectError();
             return;
         }
 
-        addEntities(selected, "Юр лицо");
+        addEntities(list.getRecipients(), "Юр лицо");
     }
 
     private void addUniversal() {
@@ -210,7 +265,7 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
             Entity entity = loadEntity(item);
 
             if (entity != null) {
-                addToSelected(entity, item.getEntityType());
+                addToSelected(entity, getTypeName(item.getEntityType()));
             }
         }
     }
@@ -227,7 +282,7 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
 
         return (Entity) dataManager.load(
                 Id.of(item.getEntityId(), (Class) javaClass)
-        ).optional().orElse(null);
+        ).view("_minimal").optional().orElse(null);
     }
 
     private void showSelectError() {
@@ -307,8 +362,7 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
                 if (selected != null) {
                     for (Entity entity : selected) {
                         if (entity != null) {
-                            String name = entity.getInstanceName();
-                            addToSelected(entity, name != null ? name : "Без имени");
+                            addToSelected(entity, getTypeName(entity.getMetaClass().getName()));
                         }
                     }
                 }
@@ -331,6 +385,7 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
                 screen = screenBuilders.editor(RecipientUserList.class, this)
                         .newEntity()
                         .withOpenMode(OpenMode.DIALOG)
+
                         .build();
                 break;
 
@@ -359,6 +414,28 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
                 screen = screenBuilders.editor(RecipientUniversalList.class, this)
                         .newEntity()
                         .withOpenMode(OpenMode.DIALOG)
+                        .withInitializer(entity -> {
+                            if (entity instanceof RecipientUniversalList) {
+
+                                RecipientUniversalList list = (RecipientUniversalList) entity;
+
+                                List<RecipientUniversalItem> items = new ArrayList<>();
+
+                                for (KeyValueEntity kv : selectedItemsDc.getItems()) {
+
+                                    Entity e = kv.getValue("entity");
+
+                                    RecipientUniversalItem item = metadata.create(RecipientUniversalItem.class);
+                                    item.setEntityId((UUID) e.getId());
+                                    item.setEntityName(e.getInstanceName());
+                                    item.setEntityType(e.getMetaClass().getName());
+
+                                    items.add(item);
+                                }
+
+                                list.setRecipients(items);
+                            }
+                        })
                         .build();
                 break;
 
@@ -384,5 +461,20 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
         recipientUniversalListsDl.load();
         recipientCompaniesListsDl.load();
         recipientDepartmentsListsDl.load();
+    }
+
+    private String getTypeName(String metaName) {
+        switch (metaName) {
+            case "tm$User":
+                return "Сотрудник";
+            case "df$Individual":
+                return "Физ лицо";
+            case "df$Company":
+                return "Юр лицо";
+            case "df$Department":
+                return "Подразделение";
+            default:
+                return "Неизвестно";
+        }
     }
 }

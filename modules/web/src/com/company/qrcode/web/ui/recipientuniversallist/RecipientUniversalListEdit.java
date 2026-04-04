@@ -14,10 +14,8 @@ import com.company.qrcode.web.ui.singleentityselect.SingleEntitySelect;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.qrcode.entity.RecipientUniversalList;
@@ -44,10 +42,40 @@ public class RecipientUniversalListEdit extends StandardEditor<RecipientUniversa
     private ScreenBuilders screenBuilders;
     @Inject
     private Table<RecipientUniversalItem> recipientsTable;
+    @Inject
+    private UiComponents uiComponents;
+
     @Subscribe
     public void onInit(InitEntityEvent<RecipientUniversalList> event) {
         event.getEntity().setOwner(userSession.getUser());
         event.getEntity().setAccessType(RecipientListAccessType.PRIVATE);
+
+        recipientsTable.addGeneratedColumn("entityType", entity -> {
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+
+            String metaType = entity.getEntityType();
+            String type = getTypeName(metaType);
+
+            switch (type) {
+                case "Сотрудник":
+                    label.setIcon("font-icon:USER");
+                    break;
+                case "Физ лицо":
+                    label.setIcon("font-icon:USER_O");
+                    break;
+                case "Юр лицо":
+                    label.setIcon("font-icon:BUILDING");
+                    break;
+                case "Подразделение":
+                    label.setIcon("font-icon:SITEMAP");
+                    break;
+                default:
+                    label.setIcon("font-icon:QUESTION");
+            }
+
+            label.setValue(type);
+            return label;
+        });
     }
     @Subscribe("accessTypeField")
     public void showShareWindow(HasValue.ValueChangeEvent<RecipientListAccessType> event){
@@ -115,4 +143,20 @@ public class RecipientUniversalListEdit extends StandardEditor<RecipientUniversa
             recipientsDc.getMutableItems().remove(selected);
         }
     }
+
+    private String getTypeName(String metaName) {
+        switch (metaName) {
+            case "tm$User":
+                return "Сотрудник";
+            case "df$Individual":
+                return "Физ лицо";
+            case "df$Company":
+                return "Юр лицо";
+            case "df$Department":
+                return "Подразделение";
+            default:
+                return "Неизвестно";
+        }
+    }
+
 }

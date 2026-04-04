@@ -10,19 +10,17 @@
         <item screen="qrcode$Hall.browse" caption="mainMsg://menu_config.qrcode$Hall.browse"/>
         <item screen="qrcode$EventRequest.browse" caption="mainMsg://menu_config.qrcode$EventRequest.browse"/>
         <item screen="qrcode$ExternalGuest.browse" caption="mainMsg://menu_config.qrcode$ExternalGuest.browse"/>
-        <item screen="qrcode$RecipientList.browse" caption="mainMsg://menu_config.qrcode$RecipientList.browse"/>
-        <item screen="qrcode$Request.browse" caption="mainMsg://menu_config.qrcode$Request.browse"/>
-        <item screen="qrcode_ToChoiseCorrespondent" caption="mainMsg://menu_config.qrcode_ToChoiseCorrespondent"/>
         <item screen="qrcode_DocumentEdit" caption="mainMsg://menu_config.qrcode_DocumentEdit"/>
-        <item screen="qrcode_PersonLookupScreen" caption="mainMsg://menu_config.qrcode_PersonLookupScreen"/>
+        <item screen="qrcode$RecipientList.browse" caption="mainMsg://menu_config.qrcode$RecipientList.browse"/>
         <item screen="qrcode$RecipientIndividualList.browse"
               caption="mainMsg://menu_config.qrcode$RecipientIndividualList.browse"/>
-        <item screen="qrcode_SingleEntitySelect" caption="mainMsg://menu_config.qrcode_SingleEntitySelect"/>
-        <item screen="qrcode$RecipientUniversalList.browse"
-              caption="mainMsg://menu_config.qrcode$RecipientUniversalList.browse"/>
         <item screen="qrcode$RecipientCompanyList.browse"
               caption="mainMsg://menu_config.qrcode$RecipientCompanyList.browse"/>
         <item screen="qrcode$RecipientDepartmentList.browse"
               caption="mainMsg://menu_config.qrcode$RecipientDepartmentList.browse"/>
+        <item screen="qrcode$RecipientUniversalList.browse"
+              caption="mainMsg://menu_config.qrcode$RecipientUniversalList.browse"/>
+        <item screen="qrcode_ToChoiseCorrespondent" caption="mainMsg://menu_config.qrcode_ToChoiseCorrespondent"/>
+        <item screen="qrcode_SingleEntitySelect" caption="mainMsg://menu_config.qrcode_SingleEntitySelect"/>
     </menu>
 </menu-config>
