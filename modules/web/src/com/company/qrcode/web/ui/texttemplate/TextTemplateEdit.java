@@ -35,13 +35,13 @@ public class TextTemplateEdit extends StandardEditor<TextTemplate> {
 
     @Subscribe
     public void onInit(InitEntityEvent<TextTemplate> event) {
-        String lastCategoryId = userSettingService.loadSetting("LAST_CATEGORY_CHOISE");
-        if(lastCategoryId!=null){
-            UUID categoryId = UUID.fromString(lastCategoryId);
-            TemplateCategories lastCatEntity = dataManager.load(TemplateCategories.class).id(categoryId).one();
-            event.getEntity().setCategory(lastCatEntity);
-        }
-        event.getEntity().setOwner(userSession.getUser());
+//        String lastCategoryId = userSettingService.loadSetting("LAST_CATEGORY_CHOISE");
+//        if(lastCategoryId!=null){
+//            UUID categoryId = UUID.fromString(lastCategoryId);
+//            TemplateCategories lastCatEntity = dataManager.load(TemplateCategories.class).id(categoryId).one();
+//            event.getEntity().setCategory(lastCatEntity);
+//        }
+//        event.getEntity().setOwner(userSession.getUser());
     }
     @Subscribe("categoryPickerField")
     public void onCategoryPickerField(HasValue.ValueChangeEvent<TemplateCategories> event){

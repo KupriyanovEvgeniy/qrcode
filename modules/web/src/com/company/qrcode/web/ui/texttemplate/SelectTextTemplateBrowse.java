@@ -21,7 +21,9 @@ import com.haulmont.cuba.gui.components.data.table.ContainerGroupTableItems;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.haulmont.cuba.security.app.UserSettingService;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.v7.ui.Table;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -32,7 +34,7 @@ import java.util.Set;
 @LookupComponent("textTemplatesTable")
 @LoadDataBeforeShow
 public class SelectTextTemplateBrowse extends StandardLookup<TextTemplate> {
-    private TextTemplate selectedTemplate;
+    private Set<TextTemplate> insertSelectedTemplates;
     @Inject
     private ConstructionService constructionService;
     @Inject
@@ -44,58 +46,42 @@ public class SelectTextTemplateBrowse extends StandardLookup<TextTemplate> {
     @Inject
     private Metadata metadata;
     @Inject
-    private MetadataTools metadataTools;
-    @Inject
     private UserSession userSession;
     @Inject
     private DataManager dataManager;
-
+    @Inject
+    private MessageBundle messageBundle;
+    @Inject
+    private UserSettingService userSettingService;
+    public void setTemplate(){
+        insertSelectedTemplates = selectedTemplates.getSelected();
+    }
+    public Set<TextTemplate> getTemplates(){
+        return insertSelectedTemplates;
+    }
     @Subscribe
     public void onInit(InitEvent event) {
-        selectedTemplates.setItemClickAction(new BaseAction("doubleClick"){
-            @Override
-            public void actionPerform(Component component){
-                int counter = selectedTemplates.getSelected().size();
-                if(counter==1){
+        String baseCaption = messageBundle.getMessage("selectTextTemplateBrowse.caption");
+        String dynamicPart = userSettingService.loadSetting("selectedCategoryName");
+        getWindow().setCaption(baseCaption + ": "  + dynamicPart);
+        com.vaadin.v7.ui.Table vTable = selectedTemplates.unwrap(Table.class);
+        vTable.addItemClickListener(clickEvent->{
+            if(clickEvent.getMouseEventDetails().isDoubleClick()){
+                if(!clickEvent.getMouseEventDetails().isCtrlKey()&&!clickEvent.getMouseEventDetails().isMetaKey()){
                     setTemplate();
-                    close(StandardOutcome.CLOSE);
+                    close(StandardOutcome.SELECT);
                 }
             }
         });
     }
-        @Subscribe("createNewTemplateList")
-        public void onCreateNewTemplateListClick(Button.ClickEvent event) {
-            Set<TextTemplate> selectedListTemplates = selectedTemplates.getSelected();
-            TemplateCategoriesEdit templateCategoriesEditScreen = screens.create(TemplateCategoriesEdit.class, OpenMode.DIALOG);
-            templateCategoriesEditScreen.addAfterCloseListener(afterCloseEvent -> {
-                TemplateCategories savedCategory = templateCategoriesEditScreen.getEditedEntity();
-                if(selectedListTemplates.isEmpty()){
-                    return;
-                }
-                CommitContext context = new CommitContext();
-                for(TextTemplate original: selectedListTemplates){
-                    TextTemplate new_entity = metadata.create(TextTemplate.class);
-                    new_entity.setCode(original.getCode());
-                    new_entity.setContent(original.getContent());
-                    new_entity.setOwner(userSession.getUser());
-                    new_entity.setCategory(savedCategory);
-                    context.addInstanceToCommit(new_entity);
-                }
-                dataManager.commit(context);
-            });
-            TemplateCategories newCategory = metadata.create(TemplateCategories.class);
-            templateCategoriesEditScreen.setEntityToEdit(newCategory);
-            templateCategoriesEditScreen.show();
-        }
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
         selectedTextTemplatesDc.setItems(constructionService.getActiveConstructions());
         selectedTemplates.setItems(new ContainerGroupTableItems<>(selectedTextTemplatesDc));
     }
-    public void setTemplate(){
-        selectedTemplate = selectedTemplates.getSingleSelected();
-    }
-    public TextTemplate getTemplate(){
-        return selectedTemplate;
+    @Subscribe("insertTemplates")
+    public void onInsertTemplatesClick(Button.ClickEvent event) {
+        setTemplate();
+        close(StandardOutcome.SELECT);
     }
 }

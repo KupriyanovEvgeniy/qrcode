@@ -9,5 +9,6 @@
 
     <view entity="qrcode$Hall" name="hall-view" extends="_local"/>
     <view entity="qrcode$TextTemplate" name="textTemplate-view" extends="_local">
+        <property name="category" view="_minimal"/>
     </view>
 </views>

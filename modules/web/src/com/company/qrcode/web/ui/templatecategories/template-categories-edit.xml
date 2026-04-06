@@ -22,10 +22,11 @@
     <dialogMode height="600"
                 width="800"/>
     <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="templateCategoriesDc" captionPosition="TOP" align="MIDDLE_CENTER">
-            <column>
+        <form id="form" dataContainer="templateCategoriesDc" captionPosition="TOP" align="MIDDLE_CENTER" width="100%">
+            <column width="100%">
                 <textField id="nameField" property="name" caption="Название"/>
-                <lookupField id="accessTypeField" property="accessType" caption="Тип доступа"/>
+                <lookupField id="accessTypeField" property="accessType" caption="Тип доступа" nullOptionVisible="false"/>
+                <checkBox id="activeCheckBox" property="active" caption="Активен"/>
             </column>
         </form>
         <groupBox id="shareBox" caption="msg://com.company.qrcode.entity/RecipientList.share" visible="false">

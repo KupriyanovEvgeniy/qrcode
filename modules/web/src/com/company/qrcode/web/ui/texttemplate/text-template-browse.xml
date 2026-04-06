@@ -2,55 +2,74 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://textTemplateBrowse.caption"
-        focusComponent="textTemplatesTable"
         messagesPack="com.company.qrcode.web.ui.texttemplate">
     <data readOnly="true">
-        <collection id="textTemplatesDc"
-                    class="com.company.qrcode.entity.TextTemplate">
+        <collection id="textCategoriesDc" class="com.company.qrcode.entity.TemplateCategories">
+            <view extends="_local">
+                <property name="owner" view="_minimal"/>
+            </view>
+            <loader id="categoriesTemplatesDl">
+                <query>
+                    <![CDATA[SELECT e FROM qrcode$TemplateCategories e LEFT JOIN e.share u WHERE e.active = 'True' AND (e.owner.id=:id OR e.accessType='A' OR u.id=:id)]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="textTemplatesDc" class="com.company.qrcode.entity.TextTemplate">
             <view extends="_local">
                 <property name="owner" view="_minimal"/>
                 <property name="category" view="_minimal"/>
             </view>
             <loader id="textTemplatesDl">
                 <query>
-                    <![CDATA[SELECT e FROM qrcode$TextTemplate e LEFT JOIN e.category.share u WHERE e.owner.id=:id OR e.category.accessType='A' OR u.id=:id]]>
+                    <![CDATA[SELECT e FROM qrcode$TextTemplate e WHERE e.category.id = :category]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="textTemplatesTable"
-            spacing="true">
-        <groupTable id="textTemplatesTable" width="100%" dataContainer="textTemplatesDc" multiselect="true">
-            <actions>
-                <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
-                <action id="remove" type="remove"/>
-            </actions>
-            <columns>
-                <group>
-                    <column id="category"></column>
-                </group>
-                <column id="code"/>
-                <column id="content"/>
-                <column id="active"/>
-                <column id="accessType"/>
-            </columns>
-            <rowsCount/>
-            <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
-                <button id="createBtn" action="textTemplatesTable.create"/>
-                <button id="editBtn" action="textTemplatesTable.edit"/>
-                <button id="removeBtn" action="textTemplatesTable.remove"/>
-            </buttonsPanel>
-        </groupTable>
-        <hbox id="lookupActions" spacing="true" visible="false">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
-        </hbox>
-        <buttonsPanel id="bottomButtonsPanel" alwaysVisible="true">
-            <button id="selectCategory" caption="Применить"/>
+    <dialogMode height="80%" width="80%"/>
+    <layout expand="splitPanel">
+        <split id="splitPanel" orientation="horizontal" width="100%" minSplitPosition="250px" maxSplitPosition="700px" align="MIDDLE_CENTER" height="100%">
+            <vbox id="categoriesBox" margin="true" height="100%">
+                <groupTable id="textCategoriesTable" width="100%" height="100%" dataContainer="textCategoriesDc" multiselect="true">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <columns>
+                        <column id="owner"/>
+                        <column id="name"/>
+                        <column id="active"/>
+                        <column id="accessType"/>
+                    </columns>
+                    <buttonsPanel id="buttonsPanel1" alwaysVisible="true">
+                        <button id="createBtn1" action="textCategoriesTable.create"/>
+                        <button id="editBtn1" action="textCategoriesTable.edit"/>
+                        <button id="removeBtn1" action="textCategoriesTable.remove"/>
+                    </buttonsPanel>
+                </groupTable>
+            </vbox>
+            <vbox id="templatesBox" margin="true" height="100%">
+                <groupTable id="textTemplatesTable" width="100%" height="100%" dataContainer="textTemplatesDc" multiselect="true">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
+                    <columns>
+                        <column id="content"/>
+                    </columns>
+                    <buttonsPanel id="buttonsPanel2" alwaysVisible="true" align="MIDDLE_RIGHT">
+                        <button id="editBtn2" action="textTemplatesTable.edit"/>
+                        <button id="removeBtn2" action="textTemplatesTable.remove"/>
+                        <button id="createBtn2" action="textTemplatesTable.create"/>
+                    </buttonsPanel>
+                </groupTable>
+            </vbox>
+        </split>
+        <buttonsPanel id="bottomButtonsPanel" alwaysVisible="true" width="100%">
+            <button id="selectCategory" caption="Применить категорию"/>
+            <button id="insertTemplates" caption="Вставить шаблон"/>
         </buttonsPanel>
     </layout>
 </window>

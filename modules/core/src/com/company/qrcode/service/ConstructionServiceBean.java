@@ -26,14 +26,14 @@ public class ConstructionServiceBean implements ConstructionService {
     @Cacheable(value = "constructions-cache")
     public List<TextTemplate> getActiveConstructions(){
         ObjectMapper mapper = new ObjectMapper();
-        List<UUID> ids;
+        UUID id;
         try{
-            String first = userSettingService.loadSetting("selectedTemplates");
+            String first = userSettingService.loadSetting("selectedCategory");
             if(first!=null){
-                ids = mapper.readValue(first, new TypeReference<List<UUID>>(){});
+                id = mapper.readValue(first, new TypeReference<UUID>(){});
             }
             else{
-                ids = null;
+                id = null;
             }
         }
         catch (JsonProcessingException e){
@@ -41,8 +41,8 @@ public class ConstructionServiceBean implements ConstructionService {
         }
         return dataManager
                 .load(TextTemplate.class)
-                .query("SELECT e FROM qrcode$TextTemplate e WHERE e.category.active=true AND e.id IN :selectedIds")
-                .parameter("selectedIds",ids)
+                .query("SELECT e FROM qrcode$TextTemplate e WHERE e.category.id = :selectedId")
+                .parameter("selectedId",id)
                 .view("textTemplate-view").list();
     }
 }
