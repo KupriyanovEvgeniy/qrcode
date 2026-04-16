@@ -46,10 +46,7 @@ public class RecipientUniversalListEdit extends StandardEditor<RecipientUniversa
     private UiComponents uiComponents;
 
     @Subscribe
-    public void onInit(InitEntityEvent<RecipientUniversalList> event) {
-        event.getEntity().setOwner(userSession.getUser());
-        event.getEntity().setAccessType(RecipientListAccessType.PRIVATE);
-
+    public void onInit(InitEvent event) {
         recipientsTable.addGeneratedColumn("entityType", entity -> {
             Label<String> label = uiComponents.create(Label.TYPE_STRING);
 
@@ -77,6 +74,13 @@ public class RecipientUniversalListEdit extends StandardEditor<RecipientUniversa
             return label;
         });
     }
+
+    @Subscribe
+    public void onInitEntity(InitEntityEvent<RecipientUniversalList> event) {
+        event.getEntity().setOwner(userSession.getUser());
+        event.getEntity().setAccessType(RecipientListAccessType.PRIVATE);
+    }
+
     @Subscribe("accessTypeField")
     public void showShareWindow(HasValue.ValueChangeEvent<RecipientListAccessType> event){
         RecipientListAccessType selectedType = event.getValue();
@@ -156,6 +160,27 @@ public class RecipientUniversalListEdit extends StandardEditor<RecipientUniversa
                 return "Подразделение";
             default:
                 return "Неизвестно";
+        }
+    }
+
+    public void initEntities(Collection<Entity> entities) {
+
+        if (entities == null || entities.isEmpty())
+            return;
+
+        for (Entity entity : entities) {
+
+            if (alreadyExists(entity))
+                continue;
+
+            RecipientUniversalItem item = metadata.create(RecipientUniversalItem.class);
+
+            item.setList(getEditedEntity()); // ВАЖНО!
+            item.setEntityId((UUID) entity.getId());
+            item.setEntityType(entity.getMetaClass().getName());
+            item.setEntityName(entity.getInstanceName());
+
+            recipientsDc.getMutableItems().add(item);
         }
     }
 

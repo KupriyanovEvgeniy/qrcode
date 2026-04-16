@@ -19,7 +19,7 @@
     </data>
     <layout>
         <groupBox id="adressTableGroupBox" caption="msg://addresseesTable.caption" width="100%" height="100%">
-            <table id="addresseesTable"
+            <groupTable id="addresseesTable"
                    dataContainer="addresseesDc"
                    width="100%" height="100%"
                    multiselect="true">
@@ -33,7 +33,7 @@
                     <button id="addBtn" caption="msg://addBtn"/>
                     <button id="removeBtn" caption="msg://removeBtn"/>
                 </buttonsPanel>
-            </table>
+            </groupTable>
         </groupBox>
 
     </layout>

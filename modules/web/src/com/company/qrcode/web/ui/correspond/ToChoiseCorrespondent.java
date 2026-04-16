@@ -7,6 +7,7 @@
 package com.company.qrcode.web.ui.correspond;
 
 import com.company.qrcode.entity.*;
+import com.company.qrcode.web.ui.recipientuniversallist.RecipientUniversalListEdit;
 import com.company.qrcode.web.ui.singleentityselect.SingleEntitySelect;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -414,29 +415,23 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
                 screen = screenBuilders.editor(RecipientUniversalList.class, this)
                         .newEntity()
                         .withOpenMode(OpenMode.DIALOG)
-                        .withInitializer(entity -> {
-                            if (entity instanceof RecipientUniversalList) {
-
-                                RecipientUniversalList list = (RecipientUniversalList) entity;
-
-                                List<RecipientUniversalItem> items = new ArrayList<>();
-
-                                for (KeyValueEntity kv : selectedItemsDc.getItems()) {
-
-                                    Entity e = kv.getValue("entity");
-
-                                    RecipientUniversalItem item = metadata.create(RecipientUniversalItem.class);
-                                    item.setEntityId((UUID) e.getId());
-                                    item.setEntityName(e.getInstanceName());
-                                    item.setEntityType(e.getMetaClass().getName());
-
-                                    items.add(item);
-                                }
-
-                                list.setRecipients(items);
-                            }
-                        })
                         .build();
+
+                Screen finalScreen = screen;
+                screen.addAfterShowListener(e -> {
+                    if (finalScreen instanceof RecipientUniversalListEdit) {
+
+                        RecipientUniversalListEdit editScreen = (RecipientUniversalListEdit) finalScreen;
+
+                        List<Entity> entities = new ArrayList<>();
+
+                        for (KeyValueEntity kv : selectedItemsDc.getItems()) {
+                            entities.add(kv.getValue("entity"));
+                        }
+
+                        editScreen.initEntities(entities);
+                    }
+                });
                 break;
 
             default:
@@ -476,5 +471,97 @@ public class ToChoiseCorrespondent extends StandardLookup<User> {
             default:
                 return "Неизвестно";
         }
+    }
+
+    @Subscribe("editListBtn")
+    public void onEditListBtnClick(Button.ClickEvent event) {
+
+        String tabId = entityTabs.getSelectedTab().getName();
+
+        Screen screen = null;
+
+        switch (tabId) {
+
+            case "usersTab":
+                RecipientUserList userList = usersListsTable.getSingleSelected();
+                if (userList == null) {
+                    showSelectError();
+                    return;
+                }
+
+                screen = screenBuilders.editor(RecipientUserList.class, this)
+                        .editEntity(userList)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "individualsTab":
+                RecipientIndividualList individualList = individualsListTable.getSingleSelected();
+                if (individualList == null) {
+                    showSelectError();
+                    return;
+                }
+
+                screen = screenBuilders.editor(RecipientIndividualList.class, this)
+                        .editEntity(individualList)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "companiesTab":
+                RecipientCompanyList companyList = companiesListTable.getSingleSelected();
+                if (companyList == null) {
+                    showSelectError();
+                    return;
+                }
+
+                screen = screenBuilders.editor(RecipientCompanyList.class, this)
+                        .editEntity(companyList)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "departmentsTab":
+                RecipientDepartmentList departmentList = departmentsListTable.getSingleSelected();
+                if (departmentList == null) {
+                    showSelectError();
+                    return;
+                }
+
+                screen = screenBuilders.editor(RecipientDepartmentList.class, this)
+                        .editEntity(departmentList)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "universalTab":
+                RecipientUniversalList universalList = universalListsTable.getSingleSelected();
+                if (universalList == null) {
+                    showSelectError();
+                    return;
+                }
+
+                screen = screenBuilders.editor(RecipientUniversalList.class, this)
+                        .editEntity(universalList)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            default:
+                notifications.create()
+                        .withCaption("Неизвестный тип списка")
+                        .show();
+                return;
+
+        }
+
+        screen.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.COMMIT)) {
+                reloadLists();
+            }
+        });
+
+        screen.show();
+
     }
 }

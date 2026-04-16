@@ -6,9 +6,14 @@
 
 package com.company.qrcode.web.ui.singleentityselect;
 
+import com.company.qrcode.entity.*;
+import com.company.qrcode.web.ui.recipientuniversallist.RecipientUniversalListEdit;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.thesis.core.entity.Company;
@@ -26,18 +31,24 @@ import java.util.List;
 public class SingleEntitySelect extends Screen {
     @Inject
     private TabSheet tabs;
-
     @Inject
     private Table<User> usersTable;
-
     @Inject
     private Table<Individual> individualsTable;
-
     @Inject
     private Table<Company> companiesTable;
-
     @Inject
     private Table<Department> departmentsTable;
+    @Inject
+    private CollectionLoader<Company> companiesDl;
+    @Inject
+    private CollectionLoader<Department> departmentsDl;
+    @Inject
+    private CollectionLoader<Individual> individualsDl;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private CollectionLoader<User> usersDl;
 
     private List<Entity> result = new ArrayList<>();
 
@@ -47,7 +58,6 @@ public class SingleEntitySelect extends Screen {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        // загружаем данные
         getScreenData().loadAll();
     }
 
@@ -80,5 +90,60 @@ public class SingleEntitySelect extends Screen {
     @Subscribe("cancelBtn")
     public void onCancelBtnClick(Button.ClickEvent event) {
         close(StandardOutcome.CLOSE);
+    }
+
+    @Subscribe("createBtn")
+    public void onCreateBtnClick(Button.ClickEvent event) {
+        String tabId = tabs.getSelectedTab().getName();
+
+        Screen screen = null;
+
+        switch (tabId) {
+
+            case "usersTab":
+                screen = screenBuilders.editor(User.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "individualsTab":
+                screen = screenBuilders.editor(Individual.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "companiesTab":
+                screen = screenBuilders.editor(Company.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+
+            case "departmentsTab":
+                screen = screenBuilders.editor(Department.class, this)
+                        .newEntity()
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                break;
+        }
+
+
+        screen.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.COMMIT)) {
+                reloadLists();
+            }
+        });
+
+        screen.show();
+
+    }
+
+    private void reloadLists() {
+        usersDl.load();
+        individualsDl.load();
+        companiesDl.load();
+        departmentsDl.load();
     }
 }

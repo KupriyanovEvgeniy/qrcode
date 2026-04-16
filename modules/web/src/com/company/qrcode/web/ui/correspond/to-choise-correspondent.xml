@@ -87,10 +87,15 @@
 
     <layout spacing="true">
         <vbox id="mainBox" height="100%" spacing="true">
-            <button id="addOneBtn" caption="Добавить адресата"/>
-            <button id="createListBtn" caption="Создать список"/>
-            <groupBox id="choiseUsersBox" caption="msg://choiseUsersBox.caption" height="100%">
-                <table id="selectedTable"
+            <buttonsPanel id="" visible="false">
+                <button id="addOneBtn1" caption="Добавить адресата"/>
+                <button id="createListBtn" caption="Создать список"/>
+                <button id="editListBtn" caption="Редактировать список"/>
+            </buttonsPanel>
+
+            <groupBox id="choiseUsersBox" caption="msg://choiseUsersBox.caption" height="100%" expand="selectedTable">
+                <button id="addOneBtn" caption="+" description="Добавить" align="BOTTOM_RIGHT"/>
+                <groupTable id="selectedTable"
                        dataContainer="selectedItemsDc"
                        width="100%" height="100%" multiselect="true">
                     <columns>
@@ -98,13 +103,17 @@
                         <column id="type" caption="msg://selectedTable.type"/>
                     </columns>
                     <rows/>
-                </table>
+                </groupTable>
             </groupBox>
             <buttonsPanel id="add_remove_lists_button_panel" align="MIDDLE_CENTER">
                 <button id="addList" icon="font-icon:ARROW_UP" align="MIDDLE_CENTER"/>
                 <button id="removeList" icon="font-icon:ARROW_DOWN" align="MIDDLE_CENTER"/>
             </buttonsPanel>
-            <groupBox id="choiseListsBox" height="100%" width="100%">
+            <groupBox id="choiseListsBox" caption="Списки" height="100%" width="100%" expand="entityTabs">
+                <buttonsPanel id="">
+                    <button id="createListBtn1" caption="Создать список"/>
+                    <button id="editListBtn1" caption="Редактировать список"/>
+                </buttonsPanel>
                 <tabSheet id="entityTabs" width="100%" height="100%">
                     <tab id="usersTab" caption="Сотрудники">
                         <split id="usersListsSplit" orientation="horizontal" locked="true">
@@ -219,14 +228,14 @@
 
                             <vbox id="universalViewDetailList" height="100%" width="100%" expand="universalItemsTable">
                                 <label id="universalLabelDetailList" value="Элементы списка:" align="MIDDLE_CENTER" stylename="h4"/>
-                                <table id="universalItemsTable"
+                                <groupTable id="universalItemsTable"
                                        dataContainer="universalItemsDc"
                                        width="100%" height="100%">
                                     <columns>
                                         <column id="entityName" caption="Название"/>
                                         <column id="entityType" caption="Тип"/>
                                     </columns>
-                                </table>
+                                </groupTable>
                             </vbox>
 
                         </split>
